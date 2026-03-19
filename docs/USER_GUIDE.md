@@ -65,29 +65,99 @@ All data is persisted in local SQLite databases, and the web dashboard streams r
 
 All platforms require:
 
-| Requirement       | Details                                              |
-|-------------------|------------------------------------------------------|
-| **Rust toolchain** | Edition 2021, version 1.70 or later recommended     |
-| **C compiler**    | Required by the bundled SQLite (rusqlite)             |
-| **Git**           | To clone the repository                               |
+| Requirement        | Details                                                        |
+|--------------------|----------------------------------------------------------------|
+| **Rust toolchain** | Edition 2021, stable channel, version 1.70 or later            |
+| **C compiler**     | Required by the bundled SQLite (`rusqlite` with `bundled` feature) |
+| **Git**            | To clone the repository                                        |
 
-No external libraries (libpcap, npcap, etc.) are required. All dependencies are either pure-Rust or bundled.
+**No external libraries** (libpcap, npcap, WinPcap, etc.) are required. All network I/O is implemented using Rust's `socket2` crate and platform-native APIs. SQLite is compiled from source automatically via the `rusqlite` bundled feature. The web UI assets (HTML, CSS, JavaScript) are embedded directly into the binary at compile time via `rust-embed`.
 
-Install Rust via [rustup](https://rustup.rs/):
+### Installing Rust
+
+The recommended way to install Rust on all platforms is via [rustup](https://rustup.rs/), which manages the Rust toolchain (compiler, package manager, and standard library).
+
+**macOS and Linux:**
+
+Open a terminal and run:
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
+Follow the on-screen prompts. The default installation options are fine. When the installer finishes, it will display instructions to configure your current shell. Either restart your terminal or run:
+
+```bash
+source "$HOME/.cargo/env"
+```
+
+Verify the installation:
+
+```bash
+rustc --version
+# Expected output: rustc 1.XX.X (xxxxxxx YYYY-MM-DD)
+
+cargo --version
+# Expected output: cargo 1.XX.X (xxxxxxx YYYY-MM-DD)
+```
+
+**Windows:**
+
+Download and run the [rustup-init.exe](https://win.rustup.rs/) installer. Follow the prompts. You may need to install the Visual Studio C++ Build Tools first (see the Windows section below) — the installer will tell you if they are missing.
+
+After installation, open a **new** PowerShell or Command Prompt window and verify:
+
+```powershell
+rustc --version
+cargo --version
+```
+
+**Updating Rust:**
+
+If you already have Rust installed, make sure it is up to date:
+
+```bash
+rustup update stable
+```
+
 ### macOS
 
-macOS includes a C compiler via Xcode Command Line Tools. If you don't have it:
+#### Step 1: Install Xcode Command Line Tools
+
+macOS requires the Xcode Command Line Tools, which provide the `clang` C compiler, linker, and standard headers. Most Mac users already have these installed. To check:
+
+```bash
+xcode-select -p
+```
+
+If this prints a path (e.g., `/Library/Developer/CommandLineTools`), you are set. If not, install them:
 
 ```bash
 xcode-select --install
 ```
 
-Clone and build:
+A dialog will appear asking you to install the tools. Click "Install" and wait for the download to complete (typically 1-5 minutes depending on your connection).
+
+#### Step 2: Install Git (if not already present)
+
+macOS includes Git as part of the Xcode Command Line Tools. Verify:
+
+```bash
+git --version
+# Expected output: git version 2.XX.X (Apple Git-XXX)
+```
+
+If you prefer a newer version, you can install via [Homebrew](https://brew.sh/):
+
+```bash
+brew install git
+```
+
+#### Step 3: Install Rust
+
+If you have not already installed Rust, follow the instructions in [Installing Rust](#installing-rust) above.
+
+#### Step 4: Clone and Build
 
 ```bash
 git clone https://github.com/moocow5/nettools.git
@@ -95,28 +165,105 @@ cd nettools
 cargo build
 ```
 
-The binary will be at `target/debug/nettools`.
+The first build will download and compile all dependencies (approximately 2-5 minutes on modern hardware). The debug binary will be at `target/debug/nettools`.
 
-**Permissions:** ICMP ping and traceroute work without elevated privileges on macOS (unprivileged DGRAM sockets). TCP SYN ping requires `sudo`.
+For an optimized release build:
+
+```bash
+cargo build --release
+```
+
+The release binary will be at `target/release/nettools`.
+
+#### Step 5: Verify the Build
+
+```bash
+./target/debug/nettools --help
+```
+
+You should see the list of available commands (ping, trace, mtr, scan, etc.).
+
+#### macOS Permissions
+
+| Feature | Privileges Required |
+|---------|-------------------|
+| ICMP ping | None (uses unprivileged DGRAM sockets) |
+| TCP Connect ping | None |
+| TCP SYN ping | `sudo` (requires raw sockets) |
+| UDP ping | None |
+| Traceroute (all methods) | None |
+| MTR | None |
+| Network scan | None |
+| SNMP trap listener | `sudo` (port 162 is privileged) |
+| Web dashboard | None |
+
+macOS allows unprivileged ICMP via `SOCK_DGRAM` sockets, so most features work without `sudo`. Only TCP SYN ping (which sends crafted raw packets) and the SNMP trap listener (which binds to privileged port 162) require elevated privileges.
+
+**Running with sudo:**
+
+```bash
+sudo ./target/release/nettools ping 8.8.8.8 -m tcp
+```
 
 ### Linux
 
-Install build prerequisites:
+#### Step 1: Install System Dependencies
+
+Linux requires a C compiler, linker, and standard development headers. The exact packages depend on your distribution.
+
+**Debian / Ubuntu / Linux Mint:**
 
 ```bash
-# Debian / Ubuntu
 sudo apt update
-sudo apt install build-essential curl git
-
-# Fedora / RHEL
-sudo dnf groupinstall "Development Tools"
-sudo dnf install curl git
-
-# Arch
-sudo pacman -S base-devel curl git
+sudo apt install -y build-essential curl git pkg-config
 ```
 
-Clone and build:
+This installs:
+- `build-essential` — GCC, G++, make, libc development headers
+- `curl` — needed by the Rust installer
+- `git` — to clone the repository
+- `pkg-config` — used by some Rust crates for finding system libraries
+
+**Fedora / RHEL / CentOS / Rocky Linux / AlmaLinux:**
+
+```bash
+sudo dnf groupinstall -y "Development Tools"
+sudo dnf install -y curl git pkg-config
+```
+
+On older CentOS/RHEL systems that use `yum`:
+
+```bash
+sudo yum groupinstall -y "Development Tools"
+sudo yum install -y curl git pkgconfig
+```
+
+**Arch Linux / Manjaro:**
+
+```bash
+sudo pacman -S --needed base-devel curl git pkg-config
+```
+
+**openSUSE:**
+
+```bash
+sudo zypper install -y -t pattern devel_basis
+sudo zypper install -y curl git pkg-config
+```
+
+**Alpine Linux:**
+
+```bash
+sudo apk add build-base curl git pkgconf
+```
+
+Note: Alpine uses `musl` libc. The build will produce a statically-linked binary by default if you use the `x86_64-unknown-linux-musl` target.
+
+#### Step 2: Install Rust
+
+If you have not already installed Rust, follow the instructions in [Installing Rust](#installing-rust) above.
+
+#### Step 3: Clone and Build
 
 ```bash
 git clone https://github.com/moocow5/nettools.git
@@ -124,13 +271,142 @@ cd nettools
 cargo build
 ```
 
-**Permissions:** Linux requires additional setup for ICMP sockets. See [Privileges and Permissions](#privileges-and-permissions).
+The first build will download and compile all dependencies. The debug binary will be at `target/debug/nettools`.
+
+For an optimized release build:
+
+```bash
+cargo build --release
+```
+
+The release binary will be at `target/release/nettools`.
+
+#### Step 4: Verify the Build
+
+```bash
+./target/debug/nettools --help
+```
+
+#### Linux Permissions
+
+By default, Linux does **not** allow unprivileged users to create ICMP sockets. You will see errors like `could not create ICMP socket: Permission denied` unless you configure permissions.
+
+| Feature | Privileges Required |
+|---------|-------------------|
+| ICMP ping | Needs setup (see below) |
+| TCP Connect ping | None |
+| TCP SYN ping | `sudo` or `CAP_NET_RAW` |
+| UDP ping | Needs setup (see below) |
+| Traceroute (all methods) | `sudo` or `CAP_NET_RAW` |
+| MTR | `sudo` or `CAP_NET_RAW` |
+| Network scan | Needs setup (see below) |
+| SNMP trap listener | `sudo` (port 162 is privileged) |
+| Web dashboard | None |
+
+**Option A — Enable unprivileged ICMP system-wide (recommended for development):**
+
+This allows all users on the system to create ICMP sockets without `sudo`:
+
+```bash
+sudo sysctl -w net.ipv4.ping_group_range="0 2147483647"
+```
+
+To make this permanent across reboots, add the following line to `/etc/sysctl.conf` or create a new file `/etc/sysctl.d/99-icmp.conf`:
+
+```
+net.ipv4.ping_group_range = 0 2147483647
+```
+
+Then reload:
+
+```bash
+sudo sysctl --system
+```
+
+**Option B — Grant capabilities to the binary (recommended for production):**
+
+This grants raw socket access to the specific `nettools` binary without giving blanket permissions:
+
+```bash
+sudo setcap cap_net_raw=ep ./target/release/nettools
+```
+
+After running this command, the binary can create ICMP and raw sockets without `sudo`. Note: you must re-run this command each time you rebuild the binary, as `cargo build` creates a new file.
+
+**Option C — Run with sudo:**
+
+The simplest but least convenient option:
+
+```bash
+sudo ./target/release/nettools ping 8.8.8.8
+```
+
+**Verifying permissions are configured correctly:**
+
+```bash
+# This should work without sudo after Option A or B:
+./target/release/nettools ping 8.8.8.8 -c 3
+```
+
+#### Optional: Install as a System Binary
+
+To install `nettools` so it is available from any directory:
+
+```bash
+sudo cp ./target/release/nettools /usr/local/bin/nettools
+sudo setcap cap_net_raw=ep /usr/local/bin/nettools
+```
+
+Now you can run `nettools` from anywhere:
+
+```bash
+nettools ping 8.8.8.8
+```
 
 ### Windows
 
-Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-studio-cpp-build-tools/) with the "Desktop development with C++" workload, or install the full Visual Studio Community edition.
+#### Step 1: Install Visual Studio Build Tools
 
-Then in a terminal (PowerShell or Command Prompt):
+Rust on Windows requires the Microsoft C/C++ build tools for linking and compiling native dependencies (including the bundled SQLite).
+
+1. Download the [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-studio-cpp-build-tools/) installer (free, no Visual Studio license required).
+2. Run the installer.
+3. In the **Workloads** tab, check **"Desktop development with C++"**.
+4. In the **Individual components** tab on the right sidebar, ensure these are selected:
+   - **MSVC v143 - VS 2022 C++ x64/x86 build tools** (or the latest version available)
+   - **Windows 10 SDK** (or Windows 11 SDK, any recent version)
+5. Click **Install** and wait for the download to complete (typically 2-6 GB).
+
+Alternatively, if you already have **Visual Studio 2019 or later** (Community, Professional, or Enterprise) installed with the C++ workload, that will also work.
+
+#### Step 2: Install Git
+
+If you do not already have Git installed:
+
+1. Download the [Git for Windows](https://git-scm.com/download/win) installer.
+2. Run the installer with default options.
+3. Open a **new** PowerShell or Command Prompt and verify:
+
+```powershell
+git --version
+```
+
+#### Step 3: Install Rust
+
+1. Download and run [rustup-init.exe](https://win.rustup.rs/).
+2. The installer will detect your Visual Studio installation. If it reports that the build tools are not found, go back to Step 1.
+3. Accept the default options (stable toolchain, default host triple, PATH modification).
+4. Open a **new** PowerShell or Command Prompt window after installation.
+5. Verify:
+
+```powershell
+rustc --version
+cargo --version
+```
+
+#### Step 4: Clone and Build
+
+Open PowerShell or Command Prompt:
 
 ```powershell
 git clone https://github.com/moocow5/nettools.git
@@ -138,17 +414,112 @@ cd nettools
 cargo build
 ```
 
-**Note:** On Windows, only ICMP ping (via the Windows ICMP Helper API), network scanning, and the web dashboard are supported. Traceroute and TCP SYN ping are not available on Windows. See [Platform Support Matrix](#platform-support-matrix).
+The first build will download and compile all dependencies. The debug binary will be at `target\debug\nettools.exe`.
+
+For an optimized release build:
+
+```powershell
+cargo build --release
+```
+
+The release binary will be at `target\release\nettools.exe`.
+
+#### Step 5: Verify the Build
+
+```powershell
+.\target\debug\nettools.exe --help
+```
+
+#### Windows Permissions and Limitations
+
+Windows uses a different networking stack than Unix systems. The following features are supported:
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| ICMP ping | Supported | Uses the Windows ICMP Helper API (`IcmpSendEcho2`) |
+| TCP Connect ping | Supported | Standard socket connection |
+| TCP SYN ping | **Not supported** | Windows does not expose raw TCP sockets |
+| UDP ping | **Not supported** | Windows does not expose raw UDP sockets |
+| Traceroute | **Not supported** | Requires raw ICMP sockets not available on Windows |
+| MTR | **Not supported** | Requires raw ICMP sockets not available on Windows |
+| Network scan | Supported | ICMP ping sweep + port scanning |
+| SNMP queries | Supported | Standard UDP sockets |
+| SNMP trap listener | Supported | Requires Administrator privileges for port 162 |
+| Web dashboard | Supported | All dashboard features work |
+| Export (all formats) | Supported | JSON, CSV, SVG, Visio |
+
+To run the SNMP trap listener on port 162, open PowerShell as **Administrator**:
+
+```powershell
+.\target\release\nettools.exe traps
+```
+
+Or use a non-privileged port:
+
+```powershell
+.\target\release\nettools.exe traps --bind 0.0.0.0:10162
+```
+
+#### Windows Firewall
+
+Windows Firewall may prompt you to allow network access the first time you run `nettools`. Click **Allow access** when prompted. If you dismissed the prompt, you can manually add a firewall rule:
+
+```powershell
+# Run as Administrator
+New-NetFirewallRule -DisplayName "nettools" -Direction Inbound -Program "$PWD\target\release\nettools.exe" -Action Allow
+```
 
 ### Release Build
 
-For optimized production binaries:
+For optimized production binaries on any platform:
 
 ```bash
 cargo build --release
 ```
 
-The optimized binary will be at `target/release/nettools`. Release builds are significantly faster for network scanning and large-scale monitoring.
+| Build Type | Binary Location | Use Case |
+|------------|----------------|----------|
+| Debug | `target/debug/nettools` | Development and testing |
+| Release | `target/release/nettools` | Production use |
+
+Release builds enable compiler optimizations (`-O2`), LTO (link-time optimization), and strip debug symbols. They are significantly faster for network scanning and large-scale monitoring operations. The trade-off is longer compile times (typically 2-5 minutes vs. 30-60 seconds for debug).
+
+### Cross-Compilation
+
+If you want to build for a different target platform from your current machine, you can use Rust's cross-compilation support.
+
+**Example: Build a Linux binary on macOS:**
+
+```bash
+# Add the Linux target
+rustup target add x86_64-unknown-linux-gnu
+
+# Build (requires a cross-linker — see https://github.com/cross-rs/cross for an easier approach)
+cargo build --release --target x86_64-unknown-linux-gnu
+```
+
+For easier cross-compilation, consider using the [cross](https://github.com/cross-rs/cross) tool, which handles the cross-compilation toolchain automatically using Docker:
+
+```bash
+cargo install cross
+cross build --release --target x86_64-unknown-linux-gnu
+```
+
+### Verifying Your Build
+
+After building, you can run the built-in self-check:
+
+```bash
+# Show version and available commands
+nettools --help
+
+# Quick ICMP ping test (verifies socket permissions)
+nettools ping 127.0.0.1 -c 3
+
+# Quick dashboard test (verifies web server and embedded assets)
+nettools dashboard &
+# Open http://127.0.0.1:9090 in your browser, then stop with Ctrl+C
+```
 
 ---
 

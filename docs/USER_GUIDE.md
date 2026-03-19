@@ -90,8 +90,8 @@ xcode-select --install
 Clone and build:
 
 ```bash
-git clone <repository-url> "Network Tools"
-cd "Network Tools"
+git clone https://github.com/moocow5/nettools.git
+cd nettools
 cargo build
 ```
 
@@ -119,8 +119,8 @@ sudo pacman -S base-devel curl git
 Clone and build:
 
 ```bash
-git clone <repository-url> "Network Tools"
-cd "Network Tools"
+git clone https://github.com/moocow5/nettools.git
+cd nettools
 cargo build
 ```
 
@@ -133,8 +133,8 @@ Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-st
 Then in a terminal (PowerShell or Command Prompt):
 
 ```powershell
-git clone <repository-url> "Network Tools"
-cd "Network Tools"
+git clone https://github.com/moocow5/nettools.git
+cd nettools
 cargo build
 ```
 

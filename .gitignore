@@ -18,9 +18,10 @@ devices.json
 network.svg
 network.vsdx
 
-# Generated docs
-Network_Tools_Suite_Guide.pdf
+# Generated docs (keep the PDF in docs/ for GitHub)
+/Network_Tools_Suite_Guide.pdf
 generate_guide.py
+!docs/Network_Tools_Suite_Guide.pdf
 
 # Archive
 _archive/

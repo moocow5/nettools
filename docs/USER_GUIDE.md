@@ -529,17 +529,17 @@ nettools dashboard &
 
 Different features require different privilege levels depending on the platform:
 
-| Feature               | macOS          | Linux                        | Windows        |
-|-----------------------|----------------|------------------------------|----------------|
-| ICMP ping             | No privileges  | Needs setup (see below)      | No privileges  |
-| TCP Connect ping      | No privileges  | No privileges                | No privileges  |
-| TCP SYN ping          | `sudo`         | `sudo` or `CAP_NET_RAW`     | Not supported  |
-| UDP ping              | No privileges  | Needs setup (see below)      | Not supported  |
-| Traceroute (ICMP)     | No privileges  | `sudo` or `CAP_NET_RAW`     | Not supported  |
-| Traceroute (UDP/TCP)  | No privileges  | `sudo` or `CAP_NET_RAW`     | Not supported  |
-| MTR                   | No privileges  | `sudo` or `CAP_NET_RAW`     | Not supported  |
-| Network scan          | No privileges  | Needs setup (see below)      | No privileges  |
-| SNMP trap listener    | `sudo` (port 162) | `sudo` (port 162)        | Admin (port 162) |
+| Feature               | macOS          | Linux                        | Windows                  |
+|-----------------------|----------------|------------------------------|--------------------------|
+| ICMP ping             | No privileges  | Needs setup (see below)      | No privileges            |
+| TCP Connect ping      | No privileges  | No privileges                | No privileges            |
+| TCP SYN ping          | `sudo`         | `sudo` or `CAP_NET_RAW`     | Falls back to TCP Connect |
+| UDP ping              | No privileges  | Needs setup (see below)      | No privileges            |
+| Traceroute (ICMP)     | No privileges  | `sudo` or `CAP_NET_RAW`     | No privileges            |
+| Traceroute (UDP/TCP)  | No privileges  | `sudo` or `CAP_NET_RAW`     | Not supported            |
+| MTR (ICMP)            | No privileges  | `sudo` or `CAP_NET_RAW`     | No privileges            |
+| Network scan          | No privileges  | Needs setup (see below)      | No privileges            |
+| SNMP trap listener    | `sudo` (port 162) | `sudo` (port 162)        | Admin (port 162)         |
 
 ### Linux: Enabling Unprivileged ICMP
 

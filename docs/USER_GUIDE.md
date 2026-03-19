@@ -440,10 +440,10 @@ Windows uses a different networking stack than Unix systems. The following featu
 | TCP Connect ping | Supported | Standard socket connection |
 | TCP SYN ping | Supported (fallback) | Automatically falls back to TCP Connect timing (no raw sockets on Windows) |
 | UDP ping | Supported | Uses standard `tokio::net::UdpSocket` |
-| Traceroute (ICMP) | Supported | Uses `IcmpSendEcho` with TTL control via `IP_OPTION_INFORMATION` |
-| MTR | Supported | Continuous traceroute using the Windows ICMP API |
-| Traceroute (UDP) | **Not supported** | UDP traceroute requires raw ICMP receive sockets not available on Windows |
-| Traceroute (TCP) | **Not supported** | TCP traceroute requires raw ICMP receive sockets not available on Windows |
+| Traceroute (ICMP) | Supported (Admin) | Uses raw ICMP socket (`SOCK_RAW + IPPROTO_ICMP`) with TTL control. Requires Administrator privileges. |
+| MTR | Supported (Admin) | Continuous traceroute using raw ICMP socket. All methods (ICMP/UDP/TCP) supported. Requires Administrator privileges. |
+| Traceroute (UDP) | Supported (Admin) | Uses raw ICMP socket (`SOCK_RAW + IPPROTO_ICMP`) to receive Time Exceeded responses from UDP probes. Requires Administrator privileges. |
+| Traceroute (TCP) | Supported (Admin) | Uses raw ICMP socket to receive Time Exceeded responses from TCP SYN probes. Requires Administrator privileges. |
 | Network scan | Supported | ICMP ping sweep + port scanning |
 | SNMP queries | Supported | Standard UDP sockets |
 | SNMP trap listener | Supported | Requires Administrator privileges for port 162 |
@@ -536,8 +536,8 @@ Different features require different privilege levels depending on the platform:
 | TCP SYN ping          | `sudo`         | `sudo` or `CAP_NET_RAW`     | Falls back to TCP Connect |
 | UDP ping              | No privileges  | Needs setup (see below)      | No privileges            |
 | Traceroute (ICMP)     | No privileges  | `sudo` or `CAP_NET_RAW`     | No privileges            |
-| Traceroute (UDP/TCP)  | No privileges  | `sudo` or `CAP_NET_RAW`     | Not supported            |
-| MTR (ICMP)            | No privileges  | `sudo` or `CAP_NET_RAW`     | No privileges            |
+| Traceroute (UDP/TCP)  | No privileges  | `sudo` or `CAP_NET_RAW`     | Administrator            |
+| MTR (all methods)     | No privileges  | `sudo` or `CAP_NET_RAW`     | Administrator (UDP/TCP), No privileges (ICMP) |
 | Network scan          | No privileges  | Needs setup (see below)      | No privileges            |
 | SNMP trap listener    | `sudo` (port 162) | `sudo` (port 162)        | Admin (port 162)         |
 
@@ -1313,8 +1313,8 @@ You can specify custom paths using `--db`, `--ping-db`, or `--mapper-db` flags d
 | TCP SYN ping | Yes (sudo) | Yes (sudo/CAP_NET_RAW) | Falls back to TCP Connect |
 | UDP ping | Yes | Yes | Yes |
 | Traceroute (ICMP) | Yes | Yes (sudo/CAP_NET_RAW) | Yes |
-| Traceroute (UDP/TCP) | Yes | Yes (sudo/CAP_NET_RAW) | No |
-| MTR | Yes | Yes (sudo/CAP_NET_RAW) | Yes (ICMP only) |
+| Traceroute (UDP/TCP) | Yes | Yes (sudo/CAP_NET_RAW) | Yes (Admin) |
+| MTR | Yes | Yes (sudo/CAP_NET_RAW) | Yes (Admin for UDP/TCP) |
 | Network scan | Yes | Yes | Yes |
 | SNMP queries | Yes | Yes | Yes |
 | SNMP traps | Yes | Yes | Yes |
@@ -1366,13 +1366,17 @@ sudo setcap cap_net_raw=ep ./target/release/nettools
 
 ### Windows: Traceroute not working
 
-ICMP traceroute and MTR are supported on Windows using the Windows ICMP Helper API. If you encounter issues:
+All traceroute methods (ICMP, UDP, TCP) are supported on Windows. If you encounter issues:
 
-- Ensure you are using the ICMP method (the default). UDP and TCP traceroute methods are not available on Windows.
+- **ICMP traceroute** uses the Windows ICMP Helper API and works without elevation
+- **UDP and TCP traceroute** require **Administrator privileges** because they use a raw ICMP socket (`SOCK_RAW + IPPROTO_ICMP`) to receive Time Exceeded responses
+- If you see "Permission denied" or error 10013, run as Administrator
 - Check that Windows Firewall is not blocking ICMP traffic
-- Try running as Administrator if you see permission errors
-
-Note: UDP traceroute (`--method udp`) and TCP traceroute (`--method tcp`) require raw ICMP receive sockets that are not available on the Windows networking stack. Use the default ICMP method instead.
+- Try running PowerShell or Command Prompt as Administrator:
+  ```powershell
+  .\target\release\nettools.exe trace 8.8.8.8 --method udp
+  .\target\release\nettools.exe trace 8.8.8.8 --method tcp --port 443
+  ```
 
 ### High packet loss in results
 

@@ -1,351 +1,179 @@
 //! Windows traceroute socket implementation.
 //!
-//! Uses the Windows ICMP Helper API (`IcmpSendEcho`) with TTL control via
-//! `IP_OPTION_INFORMATION` to implement traceroute. Each `send_probe` stashes
-//! the request parameters, and `recv_icmp` performs the actual blocking
-//! `IcmpSendEcho` call on a tokio blocking thread.
+//! Uses a raw ICMP socket (`SOCK_RAW + IPPROTO_ICMP`) via `socket2` to
+//! send ICMP echo requests with controlled TTL and receive all ICMP
+//! responses (Echo Reply, Time Exceeded, Destination Unreachable).
 //!
-//! This approach supports:
-//! - ICMP Time Exceeded from intermediate routers (IP_TTL_EXPIRED_TRANSIT)
-//! - ICMP Echo Reply from the destination (IP_SUCCESS)
-//! - ICMP Destination Unreachable (IP_DEST_*)
+//! This approach supports all traceroute methods (ICMP, UDP, TCP) because
+//! the raw ICMP socket receives all inbound ICMP packets, including error
+//! responses triggered by UDP/TCP probes.
+//!
+//! **Requires Administrator privileges** — same as Linux requiring
+//! `sudo` or `CAP_NET_RAW`.
+//!
+//! Async I/O is handled via `tokio::task::spawn_blocking` since
+//! `tokio::io::unix::AsyncFd` is not available on Windows.
 
 use crate::socket::{RecvResult, TraceSocketTrait};
 use crate::{NtraceError, Result};
 
-use std::net::{IpAddr, Ipv4Addr};
-use std::sync::Mutex;
+use socket2::{Domain, Protocol, SockAddr, Socket, Type};
+use std::mem::MaybeUninit;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr, SocketAddrV4};
+use std::sync::Arc;
 use std::time::Duration;
 
-use windows_sys::Win32::Foundation::{HANDLE, INVALID_HANDLE_VALUE};
-use windows_sys::Win32::NetworkManagement::IpHelper::{
-    IcmpCloseHandle, IcmpCreateFile, IcmpSendEcho, ICMP_ECHO_REPLY, IP_OPTION_INFORMATION,
-};
-use windows_sys::Win32::Networking::WinSock::IPAddr;
-
-// Windows ICMP status codes
-const IP_SUCCESS: u32 = 0;
-const IP_TTL_EXPIRED_TRANSIT: u32 = 11013;
-const IP_TTL_EXPIRED_REASSEM: u32 = 11014;
-const IP_DEST_NET_UNREACHABLE: u32 = 11002;
-const IP_DEST_HOST_UNREACHABLE: u32 = 11003;
-const IP_DEST_PROT_UNREACHABLE: u32 = 11004;
-const IP_DEST_PORT_UNREACHABLE: u32 = 11005;
-
-/// Traceroute socket for Windows using the ICMP Helper API.
+/// Raw ICMP socket for traceroute on Windows.
 ///
-/// The `IcmpSendEcho` API combines send and receive into a single blocking
-/// call. To fit the `TraceSocketTrait`, which separates the two, we stash
-/// the request in `send_probe` and perform the actual work in `recv_icmp`
-/// via `tokio::task::spawn_blocking`.
+/// Uses `SOCK_RAW + IPPROTO_ICMP` which can both send ICMP echo requests
+/// and receive all ICMP response types (Time Exceeded, Dest Unreachable,
+/// Echo Reply). This enables ICMP, UDP, and TCP traceroute methods.
 pub struct TraceSocket {
-    handle: IcmpHandle,
-    /// Pending probe stashed by `send_probe`, consumed by `recv_icmp`.
-    pending: Mutex<Option<PendingProbe>>,
-}
-
-struct PendingProbe {
-    target: IpAddr,
-    ttl: u8,
-    packet: Vec<u8>,
-}
-
-/// Thin wrapper so we can `Send + Sync` the raw HANDLE.
-struct IcmpHandle(HANDLE);
-unsafe impl Send for IcmpHandle {}
-unsafe impl Sync for IcmpHandle {}
-
-impl Drop for IcmpHandle {
-    fn drop(&mut self) {
-        unsafe {
-            IcmpCloseHandle(self.0);
-        }
-    }
+    socket: Arc<Socket>,
 }
 
 impl TraceSocket {
-    /// Open an ICMP handle via `IcmpCreateFile`.
+    /// Create a new raw ICMP socket.
+    ///
+    /// **Requires Administrator privileges.** If you get "Permission denied",
+    /// run the application as Administrator.
     pub fn new() -> Result<Self> {
-        let handle = unsafe { IcmpCreateFile() };
-        if handle == INVALID_HANDLE_VALUE {
-            return Err(NtraceError::SocketCreate(format!(
-                "IcmpCreateFile failed: {}",
-                std::io::Error::last_os_error()
-            )));
-        }
+        let socket = Socket::new(Domain::IPV4, Type::RAW, Some(Protocol::ICMPV4))
+            .map_err(|e| {
+                if e.raw_os_error() == Some(10013) {
+                    // WSAEACCES = 10013
+                    NtraceError::SocketCreate(
+                        "Raw ICMP socket requires Administrator privileges. \
+                         Run as Administrator or use an elevated terminal."
+                            .into(),
+                    )
+                } else {
+                    NtraceError::SocketCreate(format!("Raw ICMP socket: {}", e))
+                }
+            })?;
+
+        // Set a short default timeout for recv — we'll use our own timeout logic
+        // but this prevents spawn_blocking from hanging indefinitely.
+        socket
+            .set_read_timeout(Some(Duration::from_millis(100)))
+            .map_err(|e| NtraceError::SocketCreate(format!("set_read_timeout: {}", e)))?;
+
+        // Bind to INADDR_ANY to receive ICMP responses
+        let bind_addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0);
+        socket
+            .bind(&bind_addr.into())
+            .map_err(|e| NtraceError::SocketCreate(format!("bind: {}", e)))?;
+
         Ok(Self {
-            handle: IcmpHandle(handle),
-            pending: Mutex::new(None),
+            socket: Arc::new(socket),
         })
     }
 }
 
 impl TraceSocketTrait for TraceSocket {
-    /// Stash the probe parameters for the subsequent `recv_icmp` call.
-    ///
-    /// No network I/O happens here on Windows.
+    /// Send an ICMP echo request probe with the specified TTL.
     async fn send_probe(&self, packet: &[u8], target: IpAddr, ttl: u8) -> Result<()> {
-        let probe = PendingProbe {
-            target,
-            ttl,
-            packet: packet.to_vec(),
-        };
-        *self.pending.lock().unwrap() = Some(probe);
+        // Set TTL for this probe
+        self.socket
+            .set_ttl(ttl as u32)
+            .map_err(|e| NtraceError::Send(format!("set_ttl({}): {}", ttl, e)))?;
+
+        let sock_addr = SockAddr::from(SocketAddr::new(target, 0));
+
+        self.socket
+            .send_to(packet, &sock_addr)
+            .map_err(|e| NtraceError::Send(format!("send_to: {}", e)))?;
+
         Ok(())
     }
 
-    /// Execute the ICMP send+receive via `IcmpSendEcho` on a blocking thread.
+    /// Receive an ICMP packet with the given timeout.
     ///
-    /// Returns the result classified as:
-    /// - `RecvResult` with ICMP Time Exceeded (type 11) for intermediate hops
-    /// - `RecvResult` with ICMP Echo Reply (type 0) for the destination
-    /// - `RecvResult` with ICMP Dest Unreachable (type 3) for unreachable hops
-    /// - `None` on timeout
+    /// Uses `tokio::task::spawn_blocking` with a polling loop since
+    /// `AsyncFd` is not available on Windows. The socket has a 100ms
+    /// read timeout, and we loop until we get a packet or the overall
+    /// timeout expires.
     async fn recv_icmp(&self, timeout: Duration) -> Result<Option<RecvResult>> {
-        let pending = self
-            .pending
-            .lock()
-            .unwrap()
-            .take()
-            .ok_or_else(|| {
-                NtraceError::Recv("recv_icmp called without a prior send_probe".into())
-            })?;
-
-        let handle = self.handle.0;
-        let timeout_ms = timeout.as_millis().min(u32::MAX as u128) as u32;
+        let socket = self.socket.clone();
 
         tokio::task::spawn_blocking(move || {
-            icmp_trace_probe(handle, &pending.packet, pending.target, pending.ttl, timeout_ms)
+            let deadline = std::time::Instant::now() + timeout;
+
+            loop {
+                let remaining = deadline.saturating_duration_since(std::time::Instant::now());
+                if remaining.is_zero() {
+                    return Ok(None);
+                }
+
+                // Set recv timeout to min(remaining, 100ms) to allow periodic
+                // deadline checks without busy-waiting.
+                let recv_timeout = remaining.min(Duration::from_millis(100));
+                let _ = socket.set_read_timeout(Some(recv_timeout));
+
+                let mut buf = [MaybeUninit::<u8>::uninit(); 1500];
+
+                match socket.recv_from(&mut buf) {
+                    Ok((n, addr)) => {
+                        // SAFETY: recv_from initialized `n` bytes.
+                        let data: Vec<u8> = buf[..n]
+                            .iter()
+                            .map(|b| unsafe { b.assume_init() })
+                            .collect();
+
+                        let source = addr
+                            .as_socket()
+                            .map(|sa| sa.ip())
+                            .unwrap_or(IpAddr::V4(Ipv4Addr::UNSPECIFIED));
+
+                        // On Windows, raw ICMP sockets include the IP header.
+                        // Strip it to get the ICMP data.
+                        let icmp_data = strip_ip_header(&data);
+
+                        return Ok(Some(RecvResult {
+                            bytes_received: icmp_data.len(),
+                            source,
+                            icmp_data,
+                        }));
+                    }
+                    Err(e) => {
+                        // Timeout or WSAETIMEDOUT (10060) or WSAEWOULDBLOCK (10035)
+                        let raw = e.raw_os_error().unwrap_or(0);
+                        if raw == 10060 || raw == 10035
+                            || e.kind() == std::io::ErrorKind::WouldBlock
+                            || e.kind() == std::io::ErrorKind::TimedOut
+                        {
+                            // Timeout on this recv — loop and check deadline
+                            continue;
+                        }
+                        return Err(NtraceError::Recv(format!("recv_from: {}", e)));
+                    }
+                }
+            }
         })
         .await
         .map_err(|e| NtraceError::Recv(format!("blocking task panicked: {e}")))?
     }
 }
 
-/// Perform the actual `IcmpSendEcho` call with TTL control and translate the
-/// result into the format expected by the traceroute engine.
-fn icmp_trace_probe(
-    handle: HANDLE,
-    packet: &[u8],
-    target: IpAddr,
-    ttl: u8,
-    timeout_ms: u32,
-) -> Result<Option<RecvResult>> {
-    let dest_addr: u32 = match target {
-        IpAddr::V4(v4) => u32::from_ne_bytes(v4.octets()),
-        IpAddr::V6(_) => {
-            return Err(NtraceError::Other(
-                "IPv6 traceroute is not supported on Windows".into(),
-            ));
-        }
-    };
+/// Strip the IP header from received data to get the raw ICMP payload.
+///
+/// On Windows with raw ICMP sockets, received packets include the IP header.
+/// We check for an IPv4 header and strip it based on the IHL field.
+fn strip_ip_header(data: &[u8]) -> Vec<u8> {
+    if data.len() < 20 {
+        return data.to_vec();
+    }
 
-    // The ICMP echo-request body starts after the 8-byte ICMP header.
-    let request_data = if packet.len() > 8 {
-        &packet[8..]
-    } else {
-        &[]
-    };
-
-    // Set TTL via IP_OPTION_INFORMATION
-    let ip_options = IP_OPTION_INFORMATION {
-        Ttl: ttl,
-        Tos: 0,
-        Flags: 0,
-        OptionsSize: 0,
-        OptionsData: std::ptr::null_mut(),
-    };
-
-    // Reply buffer must be large enough for ICMP_ECHO_REPLY + payload + 8
-    // bytes of ICMP error data.
-    let reply_buf_size =
-        std::mem::size_of::<ICMP_ECHO_REPLY>() + request_data.len().max(8) + 8;
-    let mut reply_buf = vec![0u8; reply_buf_size];
-
-    let ret = unsafe {
-        IcmpSendEcho(
-            handle,
-            dest_addr as IPAddr,
-            request_data.as_ptr() as *mut _,
-            request_data.len() as u16,
-            &ip_options as *const _ as *mut _,
-            reply_buf.as_mut_ptr() as *mut _,
-            reply_buf_size as u32,
-            timeout_ms,
-        )
-    };
-
-    // Parse the ICMP_ECHO_REPLY regardless of return value.
-    // When ret == 0 AND the error is a TTL expiry, the reply struct still
-    // contains the responding router's address.
-    if ret == 0 {
-        let err = std::io::Error::last_os_error();
-        let os_err = err.raw_os_error().unwrap_or(0) as u32;
-
-        match os_err {
-            // Timeout — no response at all
-            11010 => return Ok(None),
-
-            // TTL expired in transit — intermediate router responded
-            IP_TTL_EXPIRED_TRANSIT | IP_TTL_EXPIRED_REASSEM => {
-                let reply: &ICMP_ECHO_REPLY =
-                    unsafe { &*(reply_buf.as_ptr() as *const ICMP_ECHO_REPLY) };
-
-                let source = IpAddr::V4(Ipv4Addr::from(
-                    u32::from_ne_bytes(reply.Address.to_ne_bytes()),
-                ));
-
-                // Build ICMP Time Exceeded response (type 11, code 0)
-                // followed by the original IP+ICMP header so the engine
-                // can match it to the outstanding probe.
-                let icmp_data = build_time_exceeded_response(packet);
-
-                return Ok(Some(RecvResult {
-                    bytes_received: icmp_data.len(),
-                    source,
-                    icmp_data,
-                }));
-            }
-
-            // Destination unreachable variants
-            IP_DEST_NET_UNREACHABLE
-            | IP_DEST_HOST_UNREACHABLE
-            | IP_DEST_PROT_UNREACHABLE
-            | IP_DEST_PORT_UNREACHABLE => {
-                let reply: &ICMP_ECHO_REPLY =
-                    unsafe { &*(reply_buf.as_ptr() as *const ICMP_ECHO_REPLY) };
-
-                let source = IpAddr::V4(Ipv4Addr::from(
-                    u32::from_ne_bytes(reply.Address.to_ne_bytes()),
-                ));
-
-                // Map Windows error to ICMP dest unreachable code
-                let code = match os_err {
-                    IP_DEST_NET_UNREACHABLE => 0,
-                    IP_DEST_HOST_UNREACHABLE => 1,
-                    IP_DEST_PROT_UNREACHABLE => 2,
-                    IP_DEST_PORT_UNREACHABLE => 3,
-                    _ => 0,
-                };
-
-                let icmp_data = build_dest_unreachable_response(code, packet);
-
-                return Ok(Some(RecvResult {
-                    bytes_received: icmp_data.len(),
-                    source,
-                    icmp_data,
-                }));
-            }
-
-            // Other error — treat as failure
-            _ => {
-                return Err(NtraceError::Recv(format!(
-                    "IcmpSendEcho failed: {} (os error {})",
-                    err, os_err
-                )));
-            }
+    let version = (data[0] >> 4) & 0xF;
+    if version == 4 {
+        let ihl = (data[0] & 0x0F) as usize;
+        let header_len = ihl * 4;
+        if header_len <= data.len() {
+            return data[header_len..].to_vec();
         }
     }
 
-    // ret > 0 means success — we got an Echo Reply from the destination.
-    let reply: &ICMP_ECHO_REPLY =
-        unsafe { &*(reply_buf.as_ptr() as *const ICMP_ECHO_REPLY) };
-
-    let source = IpAddr::V4(Ipv4Addr::from(
-        u32::from_ne_bytes(reply.Address.to_ne_bytes()),
-    ));
-
-    // Build an ICMP Echo Reply packet that the engine can parse.
-    // Type 0 (Echo Reply), code 0, checksum 0, then id+seq from original.
-    let mut icmp_data = Vec::with_capacity(8);
-    icmp_data.push(0); // type: echo reply
-    icmp_data.push(0); // code
-    icmp_data.extend_from_slice(&[0, 0]); // checksum (not validated)
-    // Copy id + sequence from the original request if available
-    if packet.len() >= 8 {
-        icmp_data.extend_from_slice(&packet[4..8]); // id + seq
-    } else {
-        icmp_data.extend_from_slice(&[0, 0, 0, 0]);
-    }
-
-    Ok(Some(RecvResult {
-        bytes_received: icmp_data.len(),
-        source,
-        icmp_data,
-    }))
-}
-
-/// Build a synthetic ICMP Time Exceeded (type 11, code 0) response that
-/// includes the original IP header + first 8 bytes of ICMP data.
-///
-/// The traceroute engine's `classify_icmp_response` expects to find the
-/// original probe's identifier and sequence in the quoted ICMP header
-/// (bytes 4-7 of the original ICMP packet) embedded after the ICMP error
-/// header (8 bytes) and original IP header (20 bytes).
-///
-/// Layout: [type=11][code=0][checksum=0,0][unused=0,0,0,0]
-///         [original IP header (20 bytes)]
-///         [first 8 bytes of original ICMP packet]
-fn build_time_exceeded_response(original_icmp_packet: &[u8]) -> Vec<u8> {
-    let mut data = Vec::with_capacity(8 + 20 + 8);
-
-    // ICMP Time Exceeded header
-    data.push(11); // type
-    data.push(0);  // code: TTL expired in transit
-    data.extend_from_slice(&[0, 0]); // checksum
-    data.extend_from_slice(&[0, 0, 0, 0]); // unused
-
-    // Synthetic original IP header (protocol = ICMP = 1)
-    let mut ip_header = [0u8; 20];
-    ip_header[0] = 0x45; // version 4, IHL 5
-    ip_header[9] = 1;    // protocol: ICMP
-    data.extend_from_slice(&ip_header);
-
-    // First 8 bytes of the original ICMP packet (contains id + sequence)
-    let icmp_bytes = if original_icmp_packet.len() >= 8 {
-        &original_icmp_packet[..8]
-    } else {
-        original_icmp_packet
-    };
-    data.extend_from_slice(icmp_bytes);
-    // Pad to 8 bytes if needed
-    if icmp_bytes.len() < 8 {
-        data.extend(std::iter::repeat(0).take(8 - icmp_bytes.len()));
-    }
-
-    data
-}
-
-/// Build a synthetic ICMP Destination Unreachable (type 3) response.
-///
-/// Same layout as Time Exceeded but with type=3 and the given code.
-fn build_dest_unreachable_response(code: u8, original_icmp_packet: &[u8]) -> Vec<u8> {
-    let mut data = Vec::with_capacity(8 + 20 + 8);
-
-    // ICMP Dest Unreachable header
-    data.push(3);    // type
-    data.push(code); // code
-    data.extend_from_slice(&[0, 0]); // checksum
-    data.extend_from_slice(&[0, 0, 0, 0]); // unused
-
-    // Synthetic original IP header (protocol = ICMP = 1)
-    let mut ip_header = [0u8; 20];
-    ip_header[0] = 0x45;
-    ip_header[9] = 1; // protocol: ICMP
-    data.extend_from_slice(&ip_header);
-
-    // First 8 bytes of the original ICMP packet
-    let icmp_bytes = if original_icmp_packet.len() >= 8 {
-        &original_icmp_packet[..8]
-    } else {
-        original_icmp_packet
-    };
-    data.extend_from_slice(icmp_bytes);
-    if icmp_bytes.len() < 8 {
-        data.extend(std::iter::repeat(0).take(8 - icmp_bytes.len()));
-    }
-
-    data
+    data.to_vec()
 }
 
 #[cfg(test)]
@@ -353,43 +181,37 @@ mod tests {
     use super::*;
 
     #[test]
-    fn time_exceeded_response_has_correct_structure() {
-        // Simulate an ICMP Echo Request packet: type=8, code=0, cksum, id, seq
-        let original = vec![8, 0, 0, 0, 0xAB, 0xCD, 0x00, 0x01, 0xFF, 0xFF];
-        let resp = build_time_exceeded_response(&original);
+    fn strip_ip_header_normal() {
+        // Fake IPv4 header (IHL = 5 -> 20 bytes) + 8-byte ICMP stub.
+        let mut pkt = vec![0u8; 28];
+        pkt[0] = 0x45; // version 4, IHL 5
+        pkt[8] = 64; // TTL
+        pkt[20] = 11; // ICMP Time Exceeded type
+        pkt[21] = 0x00; // code 0
 
-        // Total: 8 (ICMP header) + 20 (IP header) + 8 (quoted ICMP)
-        assert_eq!(resp.len(), 36);
-        // Type = Time Exceeded
-        assert_eq!(resp[0], 11);
-        // Code = 0
-        assert_eq!(resp[1], 0);
-        // IP header starts at byte 8, protocol at byte 8+9=17
-        assert_eq!(resp[17], 1); // ICMP protocol
-        // Quoted ICMP starts at byte 28
-        assert_eq!(resp[28], 8); // original type
-        // Identifier at bytes 32-33
-        assert_eq!(resp[32], 0xAB);
-        assert_eq!(resp[33], 0xCD);
-        // Sequence at bytes 34-35
-        assert_eq!(resp[34], 0x00);
-        assert_eq!(resp[35], 0x01);
+        let icmp = strip_ip_header(&pkt);
+        assert_eq!(icmp.len(), 8);
+        assert_eq!(icmp[0], 11); // Time Exceeded type
     }
 
     #[test]
-    fn dest_unreachable_response_has_correct_code() {
-        let original = vec![8, 0, 0, 0, 0, 1, 0, 2];
-        let resp = build_dest_unreachable_response(3, &original);
-
-        assert_eq!(resp[0], 3);  // type = dest unreachable
-        assert_eq!(resp[1], 3);  // code = port unreachable
+    fn strip_ip_header_passthrough() {
+        // Data that starts with ICMP directly
+        let pkt = vec![11, 0, 0, 0, 0, 0, 0, 0];
+        let icmp = strip_ip_header(&pkt);
+        assert_eq!(icmp, pkt);
     }
 
     #[test]
-    fn short_original_packet_is_padded() {
-        let original = vec![8, 0, 0, 0]; // only 4 bytes
-        let resp = build_time_exceeded_response(&original);
-        // Should still be 36 bytes (padded to 8 bytes for quoted ICMP)
-        assert_eq!(resp.len(), 36);
+    fn strip_ip_header_short() {
+        let pkt = vec![0x45, 0x00];
+        let icmp = strip_ip_header(&pkt);
+        assert_eq!(icmp, pkt); // too short, returned as-is
+    }
+
+    #[test]
+    fn strip_ip_header_empty() {
+        let icmp = strip_ip_header(&[]);
+        assert!(icmp.is_empty());
     }
 }

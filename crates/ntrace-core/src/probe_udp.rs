@@ -10,12 +10,14 @@
 use crate::{NtraceError, Result};
 use socket2::{Domain, Protocol, Socket, Type};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr, SocketAddrV4};
-use tokio::io::unix::AsyncFd;
 
 /// UDP probe sender — sends UDP packets with controlled TTL.
 /// ICMP responses (Time Exceeded, Port Unreachable) are received on the separate ICMP socket.
 pub struct UdpProbeSender {
-    inner: AsyncFd<Socket>,
+    #[cfg(unix)]
+    inner: tokio::io::unix::AsyncFd<Socket>,
+    #[cfg(windows)]
+    inner: Socket,
     local_port: u16,
 }
 
@@ -44,8 +46,11 @@ impl UdpProbeSender {
             .map(|a| a.port())
             .unwrap_or(0);
 
-        let inner = AsyncFd::new(socket)
+        #[cfg(unix)]
+        let inner = tokio::io::unix::AsyncFd::new(socket)
             .map_err(|e| NtraceError::SocketCreate(format!("AsyncFd: {}", e)))?;
+        #[cfg(windows)]
+        let inner = socket;
 
         Ok(Self { inner, local_port })
     }
@@ -63,26 +68,43 @@ impl UdpProbeSender {
         ttl: u8,
         payload: &[u8],
     ) -> Result<()> {
-        self.inner
-            .get_ref()
-            .set_ttl(ttl as u32)
-            .map_err(|e| NtraceError::Send(format!("set_ttl({}): {}", ttl, e)))?;
-
         let addr = SocketAddr::new(target, port);
         let addr: socket2::SockAddr = addr.into();
 
-        loop {
-            let mut guard = self
-                .inner
-                .writable()
-                .await
-                .map_err(|e| NtraceError::Send(format!("writable: {}", e)))?;
+        #[cfg(unix)]
+        {
+            self.inner
+                .get_ref()
+                .set_ttl(ttl as u32)
+                .map_err(|e| NtraceError::Send(format!("set_ttl({}): {}", ttl, e)))?;
 
-            match guard.try_io(|inner| inner.get_ref().send_to(payload, &addr)) {
-                Ok(Ok(_)) => return Ok(()),
-                Ok(Err(e)) => return Err(NtraceError::Send(format!("UDP send_to: {}", e))),
-                Err(_would_block) => continue,
+            loop {
+                let mut guard = self
+                    .inner
+                    .writable()
+                    .await
+                    .map_err(|e| NtraceError::Send(format!("writable: {}", e)))?;
+
+                match guard.try_io(|inner| inner.get_ref().send_to(payload, &addr)) {
+                    Ok(Ok(_)) => return Ok(()),
+                    Ok(Err(e)) => return Err(NtraceError::Send(format!("UDP send_to: {}", e))),
+                    Err(_would_block) => continue,
+                }
             }
+        }
+
+        #[cfg(windows)]
+        {
+            self.inner
+                .set_ttl(ttl as u32)
+                .map_err(|e| NtraceError::Send(format!("set_ttl({}): {}", ttl, e)))?;
+
+            // On Windows, the socket is non-blocking but UDP sends are typically immediate.
+            // Use send_to directly — for a datagram socket this rarely blocks.
+            self.inner
+                .send_to(payload, &addr)
+                .map_err(|e| NtraceError::Send(format!("UDP send_to: {}", e)))?;
+            Ok(())
         }
     }
 }

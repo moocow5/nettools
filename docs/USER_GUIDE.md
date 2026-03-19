@@ -1,6 +1,6 @@
 # nettools User Guide
 
-**Version 0.1.0**
+**Version 1.0.0**
 
 A unified network toolkit combining ping, traceroute, network mapping, and a real-time web dashboard into a single binary.
 

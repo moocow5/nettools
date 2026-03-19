@@ -1337,7 +1337,7 @@ dependencies = [
 
 [[package]]
 name = "nettools-cli"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -1360,7 +1360,7 @@ dependencies = [
 
 [[package]]
 name = "nettools-web"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "axum",
  "chrono",
@@ -1379,7 +1379,7 @@ dependencies = [
 
 [[package]]
 name = "nmapper-core"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "aes",
  "cbc",
@@ -1405,7 +1405,7 @@ dependencies = [
 
 [[package]]
 name = "nping-core"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "chrono",
  "libc",
@@ -1422,7 +1422,7 @@ dependencies = [
 
 [[package]]
 name = "ntrace-core"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "libc",
  "nping-core",

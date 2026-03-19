@@ -97,7 +97,7 @@ fn reverse_dns_blocking(ip: std::net::Ipv4Addr) -> Option<String> {
             &sa as *const SOCKADDR_IN as *const SOCKADDR,
             std::mem::size_of::<SOCKADDR_IN>() as i32,
             host_buf.as_mut_ptr(),
-            host_buf.len() as i32,
+            host_buf.len() as u32,
             std::ptr::null_mut(),
             0,
             0,

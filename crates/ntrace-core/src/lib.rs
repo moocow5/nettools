@@ -23,3 +23,8 @@ pub use error::{NtraceError, Result};
 mod socket_unix;
 #[cfg(unix)]
 pub use socket_unix::TraceSocket;
+
+#[cfg(windows)]
+mod socket_windows;
+#[cfg(windows)]
+pub use socket_windows::TraceSocket;

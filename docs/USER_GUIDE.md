@@ -436,12 +436,14 @@ Windows uses a different networking stack than Unix systems. The following featu
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| ICMP ping | Supported | Uses the Windows ICMP Helper API (`IcmpSendEcho2`) |
+| ICMP ping | Supported | Uses the Windows ICMP Helper API (`IcmpSendEcho`) |
 | TCP Connect ping | Supported | Standard socket connection |
-| TCP SYN ping | **Not supported** | Windows does not expose raw TCP sockets |
-| UDP ping | **Not supported** | Windows does not expose raw UDP sockets |
-| Traceroute | **Not supported** | Requires raw ICMP sockets not available on Windows |
-| MTR | **Not supported** | Requires raw ICMP sockets not available on Windows |
+| TCP SYN ping | Supported (fallback) | Automatically falls back to TCP Connect timing (no raw sockets on Windows) |
+| UDP ping | Supported | Uses standard `tokio::net::UdpSocket` |
+| Traceroute (ICMP) | Supported | Uses `IcmpSendEcho` with TTL control via `IP_OPTION_INFORMATION` |
+| MTR | Supported | Continuous traceroute using the Windows ICMP API |
+| Traceroute (UDP) | **Not supported** | UDP traceroute requires raw ICMP receive sockets not available on Windows |
+| Traceroute (TCP) | **Not supported** | TCP traceroute requires raw ICMP receive sockets not available on Windows |
 | Network scan | Supported | ICMP ping sweep + port scanning |
 | SNMP queries | Supported | Standard UDP sockets |
 | SNMP trap listener | Supported | Requires Administrator privileges for port 162 |
@@ -1308,10 +1310,11 @@ You can specify custom paths using `--db`, `--ping-db`, or `--mapper-db` flags d
 |---------|-------|-------|---------|
 | ICMP ping | Yes | Yes | Yes |
 | TCP Connect ping | Yes | Yes | Yes |
-| TCP SYN ping | Yes (sudo) | Yes (sudo/CAP_NET_RAW) | No |
-| UDP ping | Yes | Yes | No |
-| Traceroute | Yes | Yes (sudo/CAP_NET_RAW) | No |
-| MTR | Yes | Yes (sudo/CAP_NET_RAW) | No |
+| TCP SYN ping | Yes (sudo) | Yes (sudo/CAP_NET_RAW) | Falls back to TCP Connect |
+| UDP ping | Yes | Yes | Yes |
+| Traceroute (ICMP) | Yes | Yes (sudo/CAP_NET_RAW) | Yes |
+| Traceroute (UDP/TCP) | Yes | Yes (sudo/CAP_NET_RAW) | No |
+| MTR | Yes | Yes (sudo/CAP_NET_RAW) | Yes (ICMP only) |
 | Network scan | Yes | Yes | Yes |
 | SNMP queries | Yes | Yes | Yes |
 | SNMP traps | Yes | Yes | Yes |
@@ -1363,7 +1366,13 @@ sudo setcap cap_net_raw=ep ./target/release/nettools
 
 ### Windows: Traceroute not working
 
-Traceroute and MTR are not supported on Windows. The implementation relies on Unix raw sockets. Use ICMP ping and network scanning features instead.
+ICMP traceroute and MTR are supported on Windows using the Windows ICMP Helper API. If you encounter issues:
+
+- Ensure you are using the ICMP method (the default). UDP and TCP traceroute methods are not available on Windows.
+- Check that Windows Firewall is not blocking ICMP traffic
+- Try running as Administrator if you see permission errors
+
+Note: UDP traceroute (`--method udp`) and TCP traceroute (`--method tcp`) require raw ICMP receive sockets that are not available on the Windows networking stack. Use the default ICMP method instead.
 
 ### High packet loss in results
 

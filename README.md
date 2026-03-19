@@ -112,9 +112,11 @@ All tabs support starting/stopping jobs, configuring parameters, and exporting r
 |---------|-------|-------|---------|
 | ICMP ping | Yes | Yes* | Yes |
 | TCP Connect ping | Yes | Yes | Yes |
-| TCP SYN ping | sudo | sudo/CAP_NET_RAW | No |
-| UDP ping | Yes | Yes* | No |
-| Traceroute / MTR | Yes | sudo/CAP_NET_RAW | No |
+| TCP SYN ping | sudo | sudo/CAP_NET_RAW | Fallback to TCP Connect |
+| UDP ping | Yes | Yes* | Yes |
+| Traceroute (ICMP) | Yes | sudo/CAP_NET_RAW | Yes |
+| Traceroute (UDP/TCP) | Yes | sudo/CAP_NET_RAW | No |
+| MTR | Yes | sudo/CAP_NET_RAW | Yes (ICMP only) |
 | Network scan | Yes | Yes | Yes |
 | SNMP | Yes | Yes | Yes |
 | Web dashboard | Yes | Yes | Yes |

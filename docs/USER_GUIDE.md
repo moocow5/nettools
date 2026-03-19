@@ -535,9 +535,9 @@ Different features require different privilege levels depending on the platform:
 | TCP Connect ping      | No privileges  | No privileges                | No privileges            |
 | TCP SYN ping          | `sudo`         | `sudo` or `CAP_NET_RAW`     | Falls back to TCP Connect |
 | UDP ping              | No privileges  | Needs setup (see below)      | No privileges            |
-| Traceroute (ICMP)     | No privileges  | `sudo` or `CAP_NET_RAW`     | No privileges            |
+| Traceroute (ICMP)     | No privileges  | `sudo` or `CAP_NET_RAW`     | Administrator            |
 | Traceroute (UDP/TCP)  | No privileges  | `sudo` or `CAP_NET_RAW`     | Administrator            |
-| MTR (all methods)     | No privileges  | `sudo` or `CAP_NET_RAW`     | Administrator (UDP/TCP), No privileges (ICMP) |
+| MTR (all methods)     | No privileges  | `sudo` or `CAP_NET_RAW`     | Administrator            |
 | Network scan          | No privileges  | Needs setup (see below)      | No privileges            |
 | SNMP trap listener    | `sudo` (port 162) | `sudo` (port 162)        | Admin (port 162)         |
 
@@ -1312,9 +1312,9 @@ You can specify custom paths using `--db`, `--ping-db`, or `--mapper-db` flags d
 | TCP Connect ping | Yes | Yes | Yes |
 | TCP SYN ping | Yes (sudo) | Yes (sudo/CAP_NET_RAW) | Falls back to TCP Connect |
 | UDP ping | Yes | Yes | Yes |
-| Traceroute (ICMP) | Yes | Yes (sudo/CAP_NET_RAW) | Yes |
+| Traceroute (ICMP) | Yes | Yes (sudo/CAP_NET_RAW) | Yes (Admin) |
 | Traceroute (UDP/TCP) | Yes | Yes (sudo/CAP_NET_RAW) | Yes (Admin) |
-| MTR | Yes | Yes (sudo/CAP_NET_RAW) | Yes (Admin for UDP/TCP) |
+| MTR | Yes | Yes (sudo/CAP_NET_RAW) | Yes (Admin) |
 | Network scan | Yes | Yes | Yes |
 | SNMP queries | Yes | Yes | Yes |
 | SNMP traps | Yes | Yes | Yes |
@@ -1368,8 +1368,7 @@ sudo setcap cap_net_raw=ep ./target/release/nettools
 
 All traceroute methods (ICMP, UDP, TCP) are supported on Windows. If you encounter issues:
 
-- **ICMP traceroute** uses the Windows ICMP Helper API and works without elevation
-- **UDP and TCP traceroute** require **Administrator privileges** because they use a raw ICMP socket (`SOCK_RAW + IPPROTO_ICMP`) to receive Time Exceeded responses
+- **All traceroute methods** (ICMP, UDP, TCP) require **Administrator privileges** because they use a raw ICMP socket (`SOCK_RAW + IPPROTO_ICMP`) to send probes and receive Time Exceeded responses
 - If you see "Permission denied" or error 10013, run as Administrator
 - Check that Windows Firewall is not blocking ICMP traffic
 - Try running PowerShell or Command Prompt as Administrator:

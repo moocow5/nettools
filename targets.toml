@@ -1,0 +1,36 @@
+[global]
+interval = "1s"
+
+[[target]]
+host = "8.8.8.8"
+label = "Google DNS"
+mode = "icmp"
+interval = "1s"
+
+[target.alert]
+max_latency_ms = 100.0
+max_loss_pct = 5.0
+
+[[target]]
+host = "1.1.1.1"
+label = "Cloudflare DNS"
+mode = "icmp"
+
+[[target]]
+host = "google.com"
+label = "Google"
+mode = "tcp-connect"
+port = 443
+interval = "2s"
+
+[[target]]
+host = "cloudflare.com"
+label = "Cloudflare"
+mode = "tcp-connect"
+port = 443
+interval = "2s"
+
+[[target]]
+host = "9.9.9.9"
+label = "Quad9 DNS"
+mode = "icmp"

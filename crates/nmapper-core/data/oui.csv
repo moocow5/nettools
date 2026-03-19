@@ -1,0 +1,956 @@
+00:00:0C,Cisco Systems
+00:01:42,Cisco Systems
+00:01:63,Cisco Systems
+00:01:64,Cisco Systems
+00:01:96,Cisco Systems
+00:01:97,Cisco Systems
+00:01:C7,Cisco Systems
+00:01:C9,Cisco Systems
+00:02:3D,Cisco Systems
+00:02:4A,Cisco Systems
+00:02:4B,Cisco Systems
+00:02:7D,Cisco Systems
+00:02:7E,Cisco Systems
+00:02:B9,Cisco Systems
+00:02:BA,Cisco Systems
+00:02:FC,Cisco Systems
+00:02:FD,Cisco Systems
+00:03:6B,Cisco Systems
+00:03:6C,Cisco Systems
+00:03:9F,Cisco Systems
+00:03:A0,Cisco Systems
+00:03:E3,Cisco Systems
+00:03:E4,Cisco Systems
+00:03:FD,Cisco Systems
+00:03:FE,Cisco Systems
+00:04:27,Cisco Systems
+00:04:28,Cisco Systems
+00:04:4D,Cisco Systems
+00:04:4E,Cisco Systems
+00:04:6D,Cisco Systems
+00:04:6E,Cisco Systems
+00:04:9A,Cisco Systems
+00:04:9B,Cisco Systems
+00:04:C0,Cisco Systems
+00:04:C1,Cisco Systems
+00:04:DD,Cisco Systems
+00:04:DE,Cisco Systems
+00:05:31,Cisco Systems
+00:05:32,Cisco Systems
+00:05:5E,Cisco Systems
+00:05:5F,Cisco Systems
+00:05:73,Cisco Systems
+00:05:74,Cisco Systems
+00:05:9A,Cisco Systems
+00:05:9B,Cisco Systems
+00:05:DC,Cisco Systems
+00:05:DD,Cisco Systems
+00:06:28,Cisco Systems
+00:06:2A,Cisco Systems
+00:06:52,Cisco Systems
+00:06:53,Cisco Systems
+00:06:7C,Cisco Systems
+00:06:D6,Cisco Systems
+00:06:D7,Cisco Systems
+00:06:F6,Cisco Systems
+00:07:0D,Cisco Systems
+00:07:0E,Cisco Systems
+00:07:4F,Cisco Systems
+00:07:50,Cisco Systems
+00:07:7D,Cisco Systems
+00:07:85,Cisco Systems
+00:07:B3,Cisco Systems
+00:07:B4,Cisco Systems
+00:07:EB,Cisco Systems
+00:07:EC,Cisco Systems
+00:08:20,Cisco Systems
+00:08:21,Cisco Systems
+00:08:2F,Cisco Systems
+00:08:30,Cisco Systems
+00:08:31,Cisco Systems
+00:08:7C,Cisco Systems
+00:08:7D,Cisco Systems
+00:08:A3,Cisco Systems
+00:08:A4,Cisco Systems
+00:08:C2,Cisco Systems
+00:08:E2,Cisco Systems
+00:08:E3,Cisco Systems
+00:09:11,Cisco Systems
+00:09:12,Cisco Systems
+00:09:43,Cisco Systems
+00:09:44,Cisco Systems
+00:09:7B,Cisco Systems
+00:09:7C,Cisco Systems
+00:09:B6,Cisco Systems
+00:09:B7,Cisco Systems
+00:09:E8,Cisco Systems
+00:09:E9,Cisco Systems
+00:0A:41,Cisco Systems
+00:0A:42,Cisco Systems
+00:0A:8A,Cisco Systems
+00:0A:8B,Cisco Systems
+00:0A:B7,Cisco Systems
+00:0A:B8,Cisco Systems
+00:0A:F3,Cisco Systems
+00:0A:F4,Cisco Systems
+00:0B:45,Cisco Systems
+00:0B:46,Cisco Systems
+00:0B:5F,Cisco Systems
+00:0B:60,Cisco Systems
+00:0B:85,Cisco Systems
+00:0B:BE,Cisco Systems
+00:0B:BF,Cisco Systems
+00:0B:FC,Cisco Systems
+00:0B:FD,Cisco Systems
+00:0C:30,Cisco Systems
+00:0C:31,Cisco Systems
+00:0C:41,Cisco Systems
+00:0C:85,Cisco Systems
+00:0C:86,Cisco Systems
+00:0C:CE,Cisco Systems
+00:0C:CF,Cisco Systems
+00:0D:28,Cisco Systems
+00:0D:29,Cisco Systems
+00:0D:65,Cisco Systems
+00:0D:66,Cisco Systems
+00:0D:BC,Cisco Systems
+00:0D:BD,Cisco Systems
+00:0D:EC,Cisco Systems
+00:0D:ED,Cisco Systems
+00:0E:08,Cisco Systems
+00:0E:38,Cisco Systems
+00:0E:39,Cisco Systems
+00:0E:83,Cisco Systems
+00:0E:84,Cisco Systems
+00:0E:D6,Cisco Systems
+00:0E:D7,Cisco Systems
+00:0F:23,Cisco Systems
+00:0F:24,Cisco Systems
+00:0F:34,Cisco Systems
+00:0F:35,Cisco Systems
+00:0F:8F,Cisco Systems
+00:0F:90,Cisco Systems
+00:0F:F7,Cisco Systems
+00:0F:F8,Cisco Systems
+00:10:07,Cisco Systems
+00:10:0B,Cisco Systems
+00:10:0D,Cisco Systems
+00:10:11,Cisco Systems
+00:10:14,Cisco Systems
+00:10:1F,Cisco Systems
+00:10:29,Cisco Systems
+00:10:2F,Cisco Systems
+00:10:54,Cisco Systems
+00:10:79,Cisco Systems
+00:10:7B,Cisco Systems
+00:10:A6,Cisco Systems
+00:10:F6,Cisco Systems
+00:10:FF,Cisco Systems
+00:11:20,Cisco Systems
+00:11:21,Cisco Systems
+00:11:5C,Cisco Systems
+00:11:5D,Cisco Systems
+00:11:92,Cisco Systems
+00:11:93,Cisco Systems
+00:11:BB,Cisco Systems
+00:11:BC,Cisco Systems
+00:12:00,Cisco Systems
+00:12:01,Cisco Systems
+00:12:17,Cisco Systems
+00:12:43,Cisco Systems
+00:12:44,Cisco Systems
+00:12:7F,Cisco Systems
+00:12:80,Cisco Systems
+00:12:D9,Cisco Systems
+00:12:DA,Cisco Systems
+00:13:10,Cisco Systems
+00:13:19,Cisco Systems
+00:13:1A,Cisco Systems
+00:13:5F,Cisco Systems
+00:13:60,Cisco Systems
+00:13:7F,Cisco Systems
+00:13:80,Cisco Systems
+00:13:C3,Cisco Systems
+00:13:C4,Cisco Systems
+00:14:1B,Cisco Systems
+00:14:1C,Cisco Systems
+00:14:69,Cisco Systems
+00:14:6A,Cisco Systems
+00:14:A8,Cisco Systems
+00:14:A9,Cisco Systems
+00:14:BF,Cisco Systems
+00:14:F1,Cisco Systems
+00:14:F2,Cisco Systems
+00:15:2B,Cisco Systems
+00:15:2C,Cisco Systems
+00:15:62,Cisco Systems
+00:15:63,Cisco Systems
+00:15:C6,Cisco Systems
+00:15:C7,Cisco Systems
+00:15:F9,Cisco Systems
+00:15:FA,Cisco Systems
+00:16:46,Cisco Systems
+00:16:47,Cisco Systems
+00:16:9C,Cisco Systems
+00:16:9D,Cisco Systems
+00:16:B6,Cisco Systems
+00:16:C7,Cisco Systems
+00:16:C8,Cisco Systems
+00:17:0E,Cisco Systems
+00:17:0F,Cisco Systems
+00:17:3B,Cisco Systems
+00:17:59,Cisco Systems
+00:17:5A,Cisco Systems
+00:17:94,Cisco Systems
+00:17:95,Cisco Systems
+00:17:DF,Cisco Systems
+00:17:E0,Cisco Systems
+00:18:0A,Cisco Systems
+00:18:18,Cisco Systems
+00:18:19,Cisco Systems
+00:18:39,Cisco Systems
+00:18:68,Cisco Systems
+00:18:73,Cisco Systems
+00:18:74,Cisco Systems
+00:18:B9,Cisco Systems
+00:18:BA,Cisco Systems
+00:18:F8,Cisco Systems
+00:19:06,Cisco Systems
+00:19:07,Cisco Systems
+00:19:2F,Cisco Systems
+00:19:30,Cisco Systems
+00:19:47,Cisco Systems
+00:19:55,Cisco Systems
+00:19:56,Cisco Systems
+00:19:A9,Cisco Systems
+00:19:AA,Cisco Systems
+00:19:E7,Cisco Systems
+00:19:E8,Cisco Systems
+00:1A:2F,Cisco Systems
+00:1A:30,Cisco Systems
+00:1A:6C,Cisco Systems
+00:1A:6D,Cisco Systems
+00:1A:A1,Cisco Systems
+00:1A:A2,Cisco Systems
+00:1A:E2,Cisco Systems
+00:1A:E3,Cisco Systems
+00:1B:0C,Cisco Systems
+00:1B:0D,Cisco Systems
+00:1B:2A,Cisco Systems
+00:1B:2B,Cisco Systems
+00:1B:53,Cisco Systems
+00:1B:54,Cisco Systems
+00:1B:67,Cisco Systems
+00:1B:8F,Cisco Systems
+00:1B:90,Cisco Systems
+00:1B:D4,Cisco Systems
+00:1B:D5,Cisco Systems
+00:1B:D7,Cisco Systems
+00:1C:0E,Cisco Systems
+00:1C:0F,Cisco Systems
+00:1C:10,Cisco Systems
+00:1C:57,Cisco Systems
+00:1C:58,Cisco Systems
+00:1C:B0,Cisco Systems
+00:1C:B1,Cisco Systems
+00:1C:F6,Cisco Systems
+00:1C:F9,Cisco Systems
+00:1D:45,Cisco Systems
+00:1D:46,Cisco Systems
+00:1D:70,Cisco Systems
+00:1D:71,Cisco Systems
+00:1D:A1,Cisco Systems
+00:1D:A2,Cisco Systems
+00:1D:E5,Cisco Systems
+00:1D:E6,Cisco Systems
+00:1E:13,Cisco Systems
+00:1E:14,Cisco Systems
+00:1E:49,Cisco Systems
+00:1E:4A,Cisco Systems
+00:1E:79,Cisco Systems
+00:1E:7A,Cisco Systems
+00:1E:BD,Cisco Systems
+00:1E:BE,Cisco Systems
+00:1E:F6,Cisco Systems
+00:1E:F7,Cisco Systems
+00:1F:26,Cisco Systems
+00:1F:27,Cisco Systems
+00:1F:6C,Cisco Systems
+00:1F:6D,Cisco Systems
+00:1F:9D,Cisco Systems
+00:1F:9E,Cisco Systems
+00:1F:C9,Cisco Systems
+00:1F:CA,Cisco Systems
+00:21:1B,Cisco Systems
+00:21:1C,Cisco Systems
+00:21:55,Cisco Systems
+00:21:56,Cisco Systems
+00:21:A0,Cisco Systems
+00:21:A1,Cisco Systems
+00:21:BE,Cisco Systems
+00:21:D7,Cisco Systems
+00:21:D8,Cisco Systems
+00:22:0C,Cisco Systems
+00:22:0D,Cisco Systems
+00:22:3A,Cisco Systems
+00:22:55,Cisco Systems
+00:22:56,Cisco Systems
+00:22:6B,Cisco Systems
+00:22:90,Cisco Systems
+00:22:91,Cisco Systems
+00:22:BD,Cisco Systems
+00:22:BE,Cisco Systems
+00:22:CE,Cisco Systems
+00:23:04,Cisco Systems
+00:23:05,Cisco Systems
+00:23:33,Cisco Systems
+00:23:34,Cisco Systems
+00:23:5D,Cisco Systems
+00:23:5E,Cisco Systems
+00:23:69,Cisco Systems
+00:23:AB,Cisco Systems
+00:23:AC,Cisco Systems
+00:23:BE,Cisco Systems
+00:23:EA,Cisco Systems
+00:23:EB,Cisco Systems
+00:24:13,Cisco Systems
+00:24:14,Cisco Systems
+00:24:50,Cisco Systems
+00:24:51,Cisco Systems
+00:24:97,Cisco Systems
+00:24:98,Cisco Systems
+00:24:C3,Cisco Systems
+00:24:C4,Cisco Systems
+00:24:F7,Cisco Systems
+00:24:F9,Cisco Systems
+00:25:2E,Cisco Systems
+00:25:45,Cisco Systems
+00:25:46,Cisco Systems
+00:25:83,Cisco Systems
+00:25:84,Cisco Systems
+00:25:B4,Cisco Systems
+00:25:B5,Cisco Systems
+00:26:0A,Cisco Systems
+00:26:0B,Cisco Systems
+00:26:51,Cisco Systems
+00:26:52,Cisco Systems
+00:26:98,Cisco Systems
+00:26:99,Cisco Systems
+00:26:CA,Cisco Systems
+00:26:CB,Cisco Systems
+00:27:0C,Cisco Systems
+00:27:0D,Cisco Systems
+00:03:47,Intel Corporation
+00:03:93,Apple
+00:05:02,Apple
+00:0A:27,Apple
+00:0A:95,Apple
+00:0D:93,Apple
+00:10:FA,Apple
+00:11:24,Apple
+00:14:51,Apple
+00:16:CB,Apple
+00:17:F2,Apple
+00:19:E3,Apple
+00:1B:63,Apple
+00:1C:B3,Apple
+00:1D:4F,Apple
+00:1E:52,Apple
+00:1E:C2,Apple
+00:1F:5B,Apple
+00:1F:F3,Apple
+00:21:E9,Apple
+00:22:41,Apple
+00:23:12,Apple
+00:23:32,Apple
+00:23:6C,Apple
+00:23:DF,Apple
+00:24:36,Apple
+00:25:00,Apple
+00:25:4B,Apple
+00:25:BC,Apple
+00:26:08,Apple
+00:26:4A,Apple
+00:26:B0,Apple
+00:26:BB,Apple
+00:27:02,Cisco Meraki
+00:18:0A,Cisco Meraki
+28:6A:BA,Samsung Electronics
+00:07:AB,Samsung Electronics
+00:12:47,Samsung Electronics
+00:12:FB,Samsung Electronics
+00:13:77,Samsung Electronics
+00:15:99,Samsung Electronics
+00:16:32,Samsung Electronics
+00:16:6B,Samsung Electronics
+00:16:DB,Samsung Electronics
+00:17:C9,Samsung Electronics
+00:17:D5,Samsung Electronics
+00:18:AF,Samsung Electronics
+00:1A:8A,Samsung Electronics
+00:1B:98,Samsung Electronics
+00:1C:43,Samsung Electronics
+00:1D:25,Samsung Electronics
+00:1D:F6,Samsung Electronics
+00:1E:75,Samsung Electronics
+00:1F:CC,Samsung Electronics
+00:21:19,Samsung Electronics
+00:21:4C,Samsung Electronics
+00:21:D1,Samsung Electronics
+00:23:39,Samsung Electronics
+00:23:99,Samsung Electronics
+00:23:D6,Samsung Electronics
+00:23:D7,Samsung Electronics
+00:24:54,Samsung Electronics
+00:24:90,Samsung Electronics
+00:24:E9,Samsung Electronics
+00:25:66,Samsung Electronics
+00:25:67,Samsung Electronics
+00:26:37,Samsung Electronics
+00:26:5D,Samsung Electronics
+00:12:F0,Intel Corporation
+00:13:02,Intel Corporation
+00:13:20,Intel Corporation
+00:13:CE,Intel Corporation
+00:13:E8,Intel Corporation
+00:15:00,Intel Corporation
+00:15:17,Intel Corporation
+00:16:6F,Intel Corporation
+00:16:76,Intel Corporation
+00:16:EA,Intel Corporation
+00:16:EB,Intel Corporation
+00:17:35,Intel Corporation
+00:18:DE,Intel Corporation
+00:19:D1,Intel Corporation
+00:19:D2,Intel Corporation
+00:1B:21,Intel Corporation
+00:1B:77,Intel Corporation
+00:1C:BF,Intel Corporation
+00:1C:C0,Intel Corporation
+00:1D:E0,Intel Corporation
+00:1D:E1,Intel Corporation
+00:1E:64,Intel Corporation
+00:1E:65,Intel Corporation
+00:1E:67,Intel Corporation
+00:1F:3B,Intel Corporation
+00:1F:3C,Intel Corporation
+00:20:7B,Intel Corporation
+00:21:5C,Intel Corporation
+00:21:5D,Intel Corporation
+00:21:6A,Intel Corporation
+00:21:6B,Intel Corporation
+00:22:FA,Intel Corporation
+00:22:FB,Intel Corporation
+00:23:14,Intel Corporation
+00:23:15,Intel Corporation
+00:24:D6,Intel Corporation
+00:24:D7,Intel Corporation
+00:08:74,Dell
+00:06:5B,Dell
+00:0B:DB,Dell
+00:0D:56,Dell
+00:0F:1F,Dell
+00:11:43,Dell
+00:12:3F,Dell
+00:13:72,Dell
+00:14:22,Dell
+00:15:C5,Dell
+00:18:8B,Dell
+00:19:B9,Dell
+00:1A:A0,Dell
+00:1C:23,Dell
+00:1D:09,Dell
+00:1E:4F,Dell
+00:1E:C9,Dell
+00:21:70,Dell
+00:21:9B,Dell
+00:22:19,Dell
+00:23:AE,Dell
+00:24:E8,Dell
+00:25:64,Dell
+00:26:B9,Dell
+00:01:E6,Hewlett-Packard
+00:01:E7,Hewlett-Packard
+00:02:A5,Hewlett-Packard
+00:04:EA,Hewlett-Packard
+00:08:02,Hewlett-Packard
+00:08:83,Hewlett-Packard
+00:0A:57,Hewlett-Packard
+00:0B:CD,Hewlett-Packard
+00:0D:9D,Hewlett-Packard
+00:0E:7F,Hewlett-Packard
+00:0F:20,Hewlett-Packard
+00:0F:61,Hewlett-Packard
+00:10:83,Hewlett-Packard
+00:10:E3,Hewlett-Packard
+00:11:0A,Hewlett-Packard
+00:11:85,Hewlett-Packard
+00:12:79,Hewlett-Packard
+00:13:21,Hewlett-Packard
+00:14:38,Hewlett-Packard
+00:14:C2,Hewlett-Packard
+00:15:60,Hewlett-Packard
+00:16:35,Hewlett-Packard
+00:17:08,Hewlett-Packard
+00:17:A4,Hewlett-Packard
+00:18:FE,Hewlett-Packard
+00:19:BB,Hewlett-Packard
+00:1A:4B,Hewlett-Packard
+00:1B:78,Hewlett-Packard
+00:1C:C4,Hewlett-Packard
+00:1E:0B,Hewlett-Packard
+00:1F:29,Hewlett-Packard
+00:21:5A,Hewlett-Packard
+00:22:64,Hewlett-Packard
+00:23:7D,Hewlett-Packard
+00:24:81,Hewlett-Packard
+00:25:B3,Hewlett-Packard
+00:26:55,Hewlett-Packard
+00:05:85,Juniper Networks
+00:10:DB,Juniper Networks
+00:12:1E,Juniper Networks
+00:14:F6,Juniper Networks
+00:17:CB,Juniper Networks
+00:19:E2,Juniper Networks
+00:1D:B5,Juniper Networks
+00:1F:12,Juniper Networks
+00:21:59,Juniper Networks
+00:22:83,Juniper Networks
+00:23:9C,Juniper Networks
+00:24:DC,Juniper Networks
+00:26:88,Juniper Networks
+00:05:69,VMware
+00:0C:29,VMware
+00:1C:14,VMware
+00:50:56,VMware
+00:03:FF,Microsoft Corporation
+00:0D:3A,Microsoft Corporation
+00:12:5A,Microsoft Corporation
+00:15:5D,Microsoft Corporation
+00:17:FA,Microsoft Corporation
+00:1D:D8,Microsoft Corporation
+00:22:48,Microsoft Corporation
+00:25:AE,Microsoft Corporation
+00:27:10,Ubiquiti Networks
+04:18:D6,Ubiquiti Networks
+18:E8:29,Ubiquiti Networks
+24:A4:3C,Ubiquiti Networks
+44:D9:E7,Ubiquiti Networks
+68:72:51,Ubiquiti Networks
+78:8A:20,Ubiquiti Networks
+80:2A:A8,Ubiquiti Networks
+B4:FB:E4,Ubiquiti Networks
+DC:9F:DB,Ubiquiti Networks
+F0:9F:C2,Ubiquiti Networks
+FC:EC:DA,Ubiquiti Networks
+00:09:5B,Netgear
+00:0F:B5,Netgear
+00:14:6C,Netgear
+00:18:4D,Netgear
+00:1B:2F,Netgear
+00:1E:2A,Netgear
+00:1F:33,Netgear
+00:22:3F,Netgear
+00:24:B2,Netgear
+00:26:F2,Netgear
+20:E5:2A,Netgear
+30:46:9A,Netgear
+00:1D:0F,TP-Link Technologies
+00:23:CD,TP-Link Technologies
+00:27:19,TP-Link Technologies
+10:FE:ED,TP-Link Technologies
+14:CC:20,TP-Link Technologies
+18:A6:F7,TP-Link Technologies
+30:B5:C2,TP-Link Technologies
+50:C7:BF,TP-Link Technologies
+54:C8:0F,TP-Link Technologies
+60:E3:27,TP-Link Technologies
+64:70:02,TP-Link Technologies
+74:DA:88,TP-Link Technologies
+78:44:76,TP-Link Technologies
+90:F6:52,TP-Link Technologies
+98:DA:C4,TP-Link Technologies
+A4:2B:B0,TP-Link Technologies
+B0:4E:26,TP-Link Technologies
+C0:25:E9,TP-Link Technologies
+C4:6E:1F,TP-Link Technologies
+D8:07:B6,TP-Link Technologies
+E8:DE:27,TP-Link Technologies
+F4:F2:6D,TP-Link Technologies
+00:1C:73,Arista Networks
+28:99:3A,Arista Networks
+44:4C:A8,Arista Networks
+00:0C:42,MikroTik
+48:A9:8A,MikroTik
+4C:5E:0C,MikroTik
+6C:3B:6B,MikroTik
+74:4D:28,MikroTik
+B8:69:F4,MikroTik
+C4:AD:34,MikroTik
+CC:2D:E0,MikroTik
+D4:CA:6D,MikroTik
+E4:8D:8C,MikroTik
+00:09:0F,Fortinet
+08:5B:0E,Fortinet
+70:4C:A5,Fortinet
+90:6C:AC,Fortinet
+00:1B:17,Palo Alto Networks
+08:66:1F,Palo Alto Networks
+B4:0C:25,Palo Alto Networks
+00:06:B1,SonicWall
+00:17:C5,SonicWall
+00:60:73,SonicWall
+C0:EA:E4,SonicWall
+00:0C:B5,Check Point Software Technologies
+00:1C:7F,Check Point Software Technologies
+00:24:6C,Aruba Networks
+04:BD:88,Aruba Networks
+18:64:72,Aruba Networks
+24:DE:C6,Aruba Networks
+40:E3:D6,Aruba Networks
+6C:F3:7F,Aruba Networks
+9C:1C:12,Aruba Networks
+AC:A3:1E,Aruba Networks
+D8:C7:C8,Aruba Networks
+00:25:C4,Ruckus Wireless
+10:DA:43,Ruckus Wireless
+24:C9:A1,Ruckus Wireless
+58:B6:33,Ruckus Wireless
+74:91:1A,Ruckus Wireless
+8C:0C:90,Ruckus Wireless
+C4:10:8A,Ruckus Wireless
+EC:8C:A2,Ruckus Wireless
+00:11:88,Synology
+00:18:2A,Synology
+00:1F:D6,QNAP Systems
+00:08:9B,QNAP Systems
+54:98:D3,Hikvision
+C0:56:E3,Hikvision
+44:19:B6,Hikvision
+C4:2F:90,Hikvision
+A4:14:37,Dahua Technology
+3C:EF:8C,Dahua Technology
+90:02:A9,Dahua Technology
+00:19:F2,Honeywell
+08:00:1F,Honeywell
+B8:27:EB,Raspberry Pi Foundation
+DC:A6:32,Raspberry Pi Foundation
+E4:5F:01,Raspberry Pi Foundation
+24:0A:C4,Espressif
+24:6F:28,Espressif
+24:B2:DE,Espressif
+30:AE:A4,Espressif
+3C:61:05,Espressif
+3C:71:BF,Espressif
+4C:11:AE,Espressif
+5C:CF:7F,Espressif
+60:01:94,Espressif
+68:C6:3A,Espressif
+80:7D:3A,Espressif
+84:0D:8E,Espressif
+84:CC:A8,Espressif
+8C:AA:B5,Espressif
+90:38:0C,Espressif
+A0:20:A6,Espressif
+A4:7B:9D,Espressif
+A4:CF:12,Espressif
+AC:67:B2,Espressif
+B4:E6:2D,Espressif
+BC:DD:C2,Espressif
+C4:4F:33,Espressif
+C8:2B:96,Espressif
+CC:50:E3,Espressif
+D8:A0:1D,Espressif
+DC:4F:22,Espressif
+EC:FA:BC,Espressif
+F0:08:D1,Espressif
+F4:CF:A2,Espressif
+00:04:4B,NVIDIA
+00:FC:8B,Amazon Technologies
+0C:47:C9,Amazon Technologies
+10:CE:A9,Amazon Technologies
+18:74:2E,Amazon Technologies
+34:D2:70,Amazon Technologies
+38:F7:3D,Amazon Technologies
+40:B4:CD,Amazon Technologies
+44:65:0D,Amazon Technologies
+50:F5:DA,Amazon Technologies
+68:37:E9,Amazon Technologies
+74:C2:46,Amazon Technologies
+84:D6:D0,Amazon Technologies
+A0:02:DC,Amazon Technologies
+AC:63:BE,Amazon Technologies
+B4:7C:9C,Amazon Technologies
+F0:27:2D,Amazon Technologies
+FC:65:DE,Amazon Technologies
+00:1A:11,Google
+3C:5A:B4,Google
+54:60:09,Google
+94:EB:2C,Google
+A4:77:33,Google
+F4:F5:D8,Google
+F8:8F:CA,Google
+00:E0:FC,Huawei Technologies
+00:1E:10,Huawei Technologies
+00:18:82,Huawei Technologies
+00:25:9E,Huawei Technologies
+04:02:1F,Huawei Technologies
+04:BD:70,Huawei Technologies
+04:C0:6F,Huawei Technologies
+08:19:A6,Huawei Technologies
+0C:37:DC,Huawei Technologies
+10:44:00,Huawei Technologies
+10:47:80,Huawei Technologies
+10:C6:1F,Huawei Technologies
+14:B9:68,Huawei Technologies
+18:C5:8A,Huawei Technologies
+1C:8E:5C,Huawei Technologies
+20:0B:C7,Huawei Technologies
+20:A6:80,Huawei Technologies
+24:09:95,Huawei Technologies
+24:69:A5,Huawei Technologies
+24:DB:AC,Huawei Technologies
+28:3C:E4,Huawei Technologies
+28:6E:D4,Huawei Technologies
+2C:9D:1E,Huawei Technologies
+30:D1:7E,Huawei Technologies
+34:29:12,Huawei Technologies
+34:6B:D3,Huawei Technologies
+38:4C:4F,Huawei Technologies
+3C:47:11,Huawei Technologies
+3C:DF:A9,Huawei Technologies
+40:4D:8E,Huawei Technologies
+44:55:B1,Huawei Technologies
+48:00:31,Huawei Technologies
+48:46:FB,Huawei Technologies
+48:AD:08,Huawei Technologies
+4C:1F:CC,Huawei Technologies
+4C:8B:EF,Huawei Technologies
+50:01:6B,Huawei Technologies
+50:A7:2B,Huawei Technologies
+54:89:98,Huawei Technologies
+54:A5:1B,Huawei Technologies
+58:60:5F,Huawei Technologies
+58:7F:66,Huawei Technologies
+5C:09:79,Huawei Technologies
+5C:4C:A9,Huawei Technologies
+5C:B3:95,Huawei Technologies
+60:DE:44,Huawei Technologies
+60:E7:01,Huawei Technologies
+64:16:F0,Huawei Technologies
+68:A0:F6,Huawei Technologies
+6C:A8:49,Huawei Technologies
+70:19:2F,Huawei Technologies
+70:72:3C,Huawei Technologies
+70:7B:E8,Huawei Technologies
+74:88:2A,Huawei Technologies
+74:A0:63,Huawei Technologies
+78:D7:52,Huawei Technologies
+7C:60:97,Huawei Technologies
+7C:A2:3E,Huawei Technologies
+80:71:7A,Huawei Technologies
+80:B6:86,Huawei Technologies
+84:5B:12,Huawei Technologies
+84:A8:E4,Huawei Technologies
+88:28:B3,Huawei Technologies
+88:3F:D3,Huawei Technologies
+88:CE:FA,Huawei Technologies
+88:CF:98,Huawei Technologies
+8C:34:FD,Huawei Technologies
+8C:A6:DF,Huawei Technologies
+90:17:AC,Huawei Technologies
+90:4E:2B,Huawei Technologies
+90:67:1C,Huawei Technologies
+94:04:9C,Huawei Technologies
+94:77:2B,Huawei Technologies
+94:DB:C9,Huawei Technologies
+98:9C:57,Huawei Technologies
+9C:28:EF,Huawei Technologies
+9C:74:1A,Huawei Technologies
+9C:B2:B2,Huawei Technologies
+A0:57:E3,Huawei Technologies
+A4:99:47,Huawei Technologies
+A4:BE:2B,Huawei Technologies
+A8:C8:3A,Huawei Technologies
+AC:4E:91,Huawei Technologies
+AC:CF:85,Huawei Technologies
+AC:E2:15,Huawei Technologies
+B0:5B:67,Huawei Technologies
+B4:15:13,Huawei Technologies
+B4:30:52,Huawei Technologies
+B8:BC:1B,Huawei Technologies
+BC:25:E0,Huawei Technologies
+BC:76:70,Huawei Technologies
+C0:70:09,Huawei Technologies
+C4:05:28,Huawei Technologies
+C4:07:2F,Huawei Technologies
+C8:51:95,Huawei Technologies
+C8:D1:5E,Huawei Technologies
+CC:A2:23,Huawei Technologies
+CC:CC:81,Huawei Technologies
+D0:7A:B5,Huawei Technologies
+D4:6A:A8,Huawei Technologies
+D4:6E:5C,Huawei Technologies
+D4:B1:10,Huawei Technologies
+D8:49:0B,Huawei Technologies
+DC:D2:FC,Huawei Technologies
+E0:19:1D,Huawei Technologies
+E0:24:7F,Huawei Technologies
+E0:97:96,Huawei Technologies
+E4:68:A3,Huawei Technologies
+E4:C2:D1,Huawei Technologies
+E8:08:8B,Huawei Technologies
+E8:68:19,Huawei Technologies
+E8:CD:2D,Huawei Technologies
+EC:23:3D,Huawei Technologies
+EC:CB:30,Huawei Technologies
+F0:43:47,Huawei Technologies
+F4:55:9C,Huawei Technologies
+F4:C7:14,Huawei Technologies
+F4:E3:FB,Huawei Technologies
+F8:01:13,Huawei Technologies
+F8:3D:FF,Huawei Technologies
+F8:4A:BF,Huawei Technologies
+F8:E8:11,Huawei Technologies
+FC:48:EF,Huawei Technologies
+00:09:6B,Lenovo
+00:06:1B,Lenovo
+00:12:FE,Lenovo
+00:1A:6B,Lenovo
+00:21:CC,Lenovo
+00:0C:6E,ASUSTek Computer
+00:0E:A6,ASUSTek Computer
+00:11:2F,ASUSTek Computer
+00:13:D4,ASUSTek Computer
+00:15:F2,ASUSTek Computer
+00:17:31,ASUSTek Computer
+00:18:F3,ASUSTek Computer
+00:1A:92,ASUSTek Computer
+00:1B:FC,ASUSTek Computer
+00:1D:60,ASUSTek Computer
+00:1E:8C,ASUSTek Computer
+00:1F:C6,ASUSTek Computer
+00:22:15,ASUSTek Computer
+00:23:54,ASUSTek Computer
+00:24:8C,ASUSTek Computer
+00:25:22,ASUSTek Computer
+00:26:18,ASUSTek Computer
+00:00:65,Acer
+00:01:F3,Acer
+00:20:59,LG Electronics
+00:22:A9,LG Electronics
+00:24:83,LG Electronics
+00:26:E2,LG Electronics
+00:01:4A,Sony Corporation
+00:04:1F,Sony Corporation
+00:0B:2E,Sony Corporation
+00:0E:07,Sony Corporation
+00:13:A9,Sony Corporation
+00:15:C1,Sony Corporation
+00:18:13,Sony Corporation
+00:19:63,Sony Corporation
+00:1A:75,Sony Corporation
+00:1B:59,Sony Corporation
+00:1D:BA,Sony Corporation
+00:1F:E4,Sony Corporation
+00:24:BE,Sony Corporation
+00:00:F0,Samsung Electronics
+00:07:04,Samsung Electronics
+00:09:18,Samsung Electronics
+00:0D:E5,Samsung Electronics
+00:12:F2,Samsung Electronics
+00:15:B9,Samsung Electronics
+00:17:C8,Samsung Electronics
+00:19:37,Samsung Electronics
+00:1A:8A,Samsung Electronics
+00:1B:99,Samsung Electronics
+00:1D:25,Samsung Electronics
+00:1E:E1,Samsung Electronics
+00:1F:CC,Samsung Electronics
+00:21:19,Samsung Electronics
+00:12:B3,Panasonic
+00:13:F0,Panasonic
+00:15:C9,Panasonic
+00:19:87,Panasonic
+00:1B:52,Panasonic
+00:1D:73,Panasonic
+00:00:BA,Brother Industries
+00:1B:A9,Brother Industries
+00:80:92,Brother Industries
+00:80:77,Brother Industries
+00:00:48,Epson
+00:1B:1B,Epson
+00:26:AB,Epson
+00:00:85,Canon
+00:1E:8F,Canon
+00:BB:3A,Canon
+00:00:74,Xerox Corporation
+00:00:AA,Xerox Corporation
+00:00:01,Xerox Corporation
+00:04:00,Lexmark International
+00:20:00,Lexmark International
+00:21:B7,Lexmark International
+00:07:4D,Zebra Technologies
+00:A0:A8,Zebra Technologies
+00:23:68,Zebra Technologies
+00:04:96,Extreme Networks
+00:01:30,Extreme Networks
+00:E0:2B,Extreme Networks
+00:04:80,Brocade Communications Systems
+00:05:1E,Brocade Communications Systems
+00:12:F2,Brocade Communications Systems
+00:1D:71,Brocade Communications Systems
+00:24:38,Brocade Communications Systems
+00:05:5D,D-Link
+00:0D:88,D-Link
+00:0F:3D,D-Link
+00:11:95,D-Link
+00:13:46,D-Link
+00:15:E9,D-Link
+00:17:9A,D-Link
+00:19:5B,D-Link
+00:1B:11,D-Link
+00:1C:F0,D-Link
+00:1E:58,D-Link
+00:1F:1F,D-Link
+00:21:91,D-Link
+00:22:B0,D-Link
+00:24:01,D-Link
+00:26:5A,D-Link
+00:06:25,Linksys
+00:0C:41,Linksys
+00:0F:66,Linksys
+00:12:17,Linksys
+00:14:BF,Linksys
+00:16:B6,Linksys
+00:18:39,Linksys
+00:1A:70,Linksys
+00:1C:10,Linksys
+00:1D:7E,Linksys
+00:1E:E5,Linksys
+00:21:29,Linksys
+00:22:6B,Linksys
+00:23:69,Linksys
+00:25:9C,Linksys
+00:27:02,Linksys
+08:86:3B,Belkin International
+00:11:50,Belkin International
+00:17:3F,Belkin International
+00:1C:DF,Belkin International
+00:22:75,Belkin International
+00:04:F2,Polycom
+00:09:2D,Polycom
+00:19:99,Polycom
+00:25:46,Polycom
+00:0E:58,Sonos
+34:7E:5C,Sonos
+5C:AA:FD,Sonos
+78:28:CA,Sonos
+94:9F:3E,Sonos
+B8:E9:37,Sonos
+00:0D:4B,Roku
+AC:3A:7A,Roku
+B0:A7:37,Roku
+C8:3A:6B,Roku
+D8:31:34,Roku
+DC:3A:5E,Roku

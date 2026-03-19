@@ -1,0 +1,29 @@
+[package]
+name = "nettools-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Unified network toolkit — ping, traceroute, and network mapping"
+
+[[bin]]
+name = "nettools"
+path = "src/main.rs"
+
+[dependencies]
+nping-core = { path = "../nping-core" }
+ntrace-core = { path = "../ntrace-core" }
+nmapper-core = { path = "../nmapper-core" }
+nettools-web = { path = "../nettools-web" }
+tokio = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+clap = { version = "4", features = ["derive"] }
+crossterm = "0.28"
+comfy-table = "7"
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+csv = "1"
+chrono = { version = "0.4", features = ["serde"] }
+anyhow = "1"

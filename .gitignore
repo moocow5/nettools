@@ -1,0 +1,39 @@
+# Build artifacts
+/target/
+
+# Database files
+*.db
+
+# Generated output files
+*.svg
+*.vsdx
+*.json
+!Cargo.lock
+!targets.toml
+!web-ui-unified/**/*.json
+
+# CSV exports
+inventory.csv
+devices.json
+network.svg
+network.vsdx
+
+# Generated docs
+Network_Tools_Suite_Guide.pdf
+generate_guide.py
+
+# Archive
+_archive/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/

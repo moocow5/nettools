@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nettools — Network Toolkit</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <h1>nettools <span class="subtitle">network toolkit</span></h1>
+        </div>
+        <nav id="main-nav">
+            <button class="nav-tab active" data-tab="ping">Ping</button>
+            <button class="nav-tab" data-tab="trace">Trace</button>
+            <button class="nav-tab" data-tab="mapper">Mapper</button>
+        </nav>
+        <div class="header-right">
+            <span id="connection-status" class="status-badge disconnected">Disconnected</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- ============================================================ -->
+        <!-- PING TAB                                                      -->
+        <!-- ============================================================ -->
+        <section id="tab-ping" class="tab-content active">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="control-panel-header">
+                    <h2>Ping Configuration</h2>
+                    <div class="control-actions">
+                        <button id="ping-start-btn" class="btn btn-primary">Start Ping</button>
+                        <button id="ping-stop-btn" class="btn btn-danger" disabled>Stop</button>
+                        <span id="ping-job-status" class="job-status"></span>
+                    </div>
+                </div>
+                <div class="control-form">
+                    <div class="form-row">
+                        <div class="form-group form-group-wide">
+                            <label for="ping-target">Target</label>
+                            <input type="text" id="ping-target" placeholder="8.8.8.8 or hostname" value="8.8.8.8">
+                        </div>
+                        <div class="form-group">
+                            <label for="ping-mode">Mode</label>
+                            <select id="ping-mode">
+                                <option value="icmp" selected>ICMP</option>
+                                <option value="tcp">TCP</option>
+                                <option value="tcp-connect">TCP Connect</option>
+                                <option value="udp">UDP</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ping-port">Port</label>
+                            <input type="number" id="ping-port" placeholder="--" min="1" max="65535">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ping-count">Count</label>
+                            <input type="number" id="ping-count" placeholder="unlimited" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="ping-interval">Interval</label>
+                            <input type="text" id="ping-interval" value="1s" placeholder="1s">
+                        </div>
+                        <div class="form-group">
+                            <label for="ping-timeout">Timeout</label>
+                            <input type="text" id="ping-timeout" value="2s" placeholder="2s">
+                        </div>
+                        <div class="form-group">
+                            <label for="ping-size">Size (bytes)</label>
+                            <input type="number" id="ping-size" value="56" min="1" max="65500">
+                        </div>
+                    </div>
+                    <details class="advanced-options">
+                        <summary>Advanced Options</summary>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ping-ttl">TTL</label>
+                                <input type="number" id="ping-ttl" placeholder="default" min="1" max="255">
+                            </div>
+                            <div class="form-group">
+                                <label for="ping-tos">ToS/DSCP</label>
+                                <input type="number" id="ping-tos" placeholder="default" min="0" max="255">
+                            </div>
+                            <div class="form-group">
+                                <label for="ping-pattern">Pattern</label>
+                                <select id="ping-pattern">
+                                    <option value="" selected>Default</option>
+                                    <option value="zeros">Zeros</option>
+                                    <option value="alt">Alt Bits</option>
+                                    <option value="random">Random</option>
+                                </select>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <div id="ping-targets-grid" class="targets-grid">
+                <!-- Populated by ping.js -->
+            </div>
+
+            <div class="chart-section">
+                <div class="section-header">
+                    <h2>RTT Timeline</h2>
+                    <div class="export-actions">
+                        <button class="btn btn-small btn-export" data-export="ping" data-format="json">Export JSON</button>
+                        <button class="btn btn-small btn-export" data-export="ping" data-format="csv">Export CSV</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="ping-rtt-chart"></canvas>
+                </div>
+            </div>
+
+            <div id="ping-alerts" class="alerts-section">
+                <h2>Recent Alerts</h2>
+                <div id="ping-alerts-list"></div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- TRACE TAB                                                     -->
+        <!-- ============================================================ -->
+        <section id="tab-trace" class="tab-content hidden">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="control-panel-header">
+                    <h2>Traceroute / MTR Configuration</h2>
+                    <div class="control-actions">
+                        <button id="trace-start-btn" class="btn btn-primary">Start Trace</button>
+                        <button id="trace-stop-btn" class="btn btn-danger" disabled>Stop</button>
+                        <span id="trace-job-status" class="job-status"></span>
+                    </div>
+                </div>
+                <div class="control-form">
+                    <div class="form-row">
+                        <div class="form-group form-group-wide">
+                            <label for="trace-target">Target</label>
+                            <input type="text" id="trace-target-input" placeholder="8.8.8.8 or hostname" value="8.8.8.8">
+                        </div>
+                        <div class="form-group">
+                            <label for="trace-method">Method</label>
+                            <select id="trace-method">
+                                <option value="icmp" selected>ICMP</option>
+                                <option value="udp">UDP</option>
+                                <option value="tcp">TCP</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="trace-port">Port</label>
+                            <input type="number" id="trace-port" placeholder="auto" min="1" max="65535">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="trace-max-ttl">Max Hops</label>
+                            <input type="number" id="trace-max-ttl" value="30" min="1" max="255">
+                        </div>
+                        <div class="form-group">
+                            <label for="trace-queries">Probes/Hop</label>
+                            <input type="number" id="trace-queries" value="1" min="1" max="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="trace-interval">Interval</label>
+                            <input type="text" id="trace-interval" value="1s" placeholder="1s">
+                        </div>
+                        <div class="form-group">
+                            <label for="trace-count">Rounds</label>
+                            <input type="number" id="trace-count" placeholder="unlimited" min="1">
+                        </div>
+                    </div>
+                    <details class="advanced-options">
+                        <summary>Advanced Options</summary>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="trace-first-ttl">First TTL</label>
+                                <input type="number" id="trace-first-ttl" value="1" min="1" max="255">
+                            </div>
+                            <div class="form-group">
+                                <label for="trace-timeout">Timeout</label>
+                                <input type="text" id="trace-timeout" value="2s" placeholder="2s">
+                            </div>
+                            <div class="form-group">
+                                <label for="trace-send-wait">Send Wait</label>
+                                <input type="text" id="trace-send-wait" value="50ms" placeholder="50ms">
+                            </div>
+                            <div class="form-group">
+                                <label for="trace-packet-size">Packet Size</label>
+                                <input type="number" id="trace-packet-size" value="60" min="28" max="65500">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="trace-no-dns"> Disable DNS
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="trace-asn"> Enable ASN Lookup
+                                </label>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <div class="trace-info-bar">
+                <span>Target: <strong id="trace-target">--</strong></span>
+                <span>Round: <strong id="trace-round">0</strong></span>
+                <span>Hops: <strong id="trace-hop-count">0</strong></span>
+            </div>
+
+            <div class="trace-table-container">
+                <div class="section-header">
+                    <h2 style="margin:0">Hop Statistics</h2>
+                    <div class="export-actions">
+                        <button class="btn btn-small btn-export" data-export="trace" data-format="json">Export JSON</button>
+                    </div>
+                </div>
+                <table id="trace-hop-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Host</th>
+                            <th>Loss%</th>
+                            <th>Snt</th>
+                            <th>Last</th>
+                            <th>Avg</th>
+                            <th>Best</th>
+                            <th>Wrst</th>
+                            <th>StDev</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trace-hop-tbody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="chart-section">
+                <h2>RTT per Hop</h2>
+                <div class="chart-container">
+                    <canvas id="trace-rtt-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- MAPPER TAB                                                    -->
+        <!-- ============================================================ -->
+        <section id="tab-mapper" class="tab-content hidden">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="control-panel-header">
+                    <h2>Network Scan Configuration</h2>
+                    <div class="control-actions">
+                        <button id="mapper-start-btn" class="btn btn-primary">Start Scan</button>
+                        <button id="mapper-stop-btn" class="btn btn-danger" disabled>Stop</button>
+                        <span id="mapper-job-status" class="job-status"></span>
+                    </div>
+                </div>
+                <div class="control-form">
+                    <div class="form-row">
+                        <div class="form-group form-group-wide">
+                            <label for="mapper-targets">Targets (comma-separated)</label>
+                            <input type="text" id="mapper-targets" placeholder="192.168.1.0/24, 10.0.0.0/24" value="192.168.1.0/24">
+                        </div>
+                        <div class="form-group">
+                            <label for="mapper-ports">Ports (comma-separated)</label>
+                            <input type="text" id="mapper-ports" placeholder="default common ports">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="mapper-ping-timeout">Ping Timeout (ms)</label>
+                            <input type="number" id="mapper-ping-timeout" value="1000" min="100" max="30000">
+                        </div>
+                        <div class="form-group">
+                            <label for="mapper-concurrency">Concurrency</label>
+                            <input type="number" id="mapper-concurrency" value="64" min="1" max="512">
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="mapper-no-arp"> Skip ARP
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="mapper-no-rdns"> Skip rDNS
+                            </label>
+                        </div>
+                    </div>
+                    <details class="advanced-options">
+                        <summary>SNMP Options</summary>
+                        <div class="form-row">
+                            <div class="form-group form-group-wide">
+                                <label for="mapper-snmp-community">SNMPv2c Community</label>
+                                <input type="text" id="mapper-snmp-community" placeholder="e.g. public">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="mapper-snmp-v3-user">SNMPv3 User</label>
+                                <input type="text" id="mapper-snmp-v3-user" placeholder="">
+                            </div>
+                            <div class="form-group">
+                                <label for="mapper-snmp-v3-auth-proto">Auth Proto</label>
+                                <select id="mapper-snmp-v3-auth-proto">
+                                    <option value="none" selected>None</option>
+                                    <option value="md5">MD5</option>
+                                    <option value="sha1">SHA1</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="mapper-snmp-v3-auth-pass">Auth Pass</label>
+                                <input type="password" id="mapper-snmp-v3-auth-pass" placeholder="">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="mapper-snmp-v3-priv-proto">Priv Proto</label>
+                                <select id="mapper-snmp-v3-priv-proto">
+                                    <option value="none" selected>None</option>
+                                    <option value="des">DES</option>
+                                    <option value="aes128">AES128</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="mapper-snmp-v3-priv-pass">Priv Pass</label>
+                                <input type="password" id="mapper-snmp-v3-priv-pass" placeholder="">
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <div class="mapper-progress" id="mapper-progress">
+                <span id="mapper-phase">Idle</span>
+                <div class="progress-bar-container">
+                    <div id="mapper-progress-bar" class="progress-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="mapper-scan-info" id="mapper-scan-info">
+                <span>Scan: <strong id="mapper-scan-id">--</strong></span>
+                <span>Started: <strong id="mapper-started">--</strong></span>
+                <span>Completed: <strong id="mapper-completed">--</strong></span>
+                <span>Subnets: <strong id="mapper-subnet-count">0</strong></span>
+                <span>Devices: <strong id="mapper-device-count">0</strong></span>
+            </div>
+
+            <div class="mapper-topology-section">
+                <div class="section-header">
+                    <h2>Network Topology</h2>
+                    <div class="export-actions">
+                        <button class="btn btn-small btn-export" data-export="mapper" data-format="json">Export JSON</button>
+                        <button class="btn btn-small btn-export" data-export="mapper" data-format="csv">Export CSV</button>
+                        <button class="btn btn-small btn-export" data-export="mapper" data-format="svg">Export SVG</button>
+                        <button class="btn btn-small btn-export" data-export="mapper" data-format="vsdx">Export Visio</button>
+                    </div>
+                </div>
+                <div id="mapper-topology-container">
+                    <svg id="mapper-topology-svg" width="100%" height="500"></svg>
+                </div>
+            </div>
+
+            <div class="mapper-devices-section">
+                <h2>Discovered Devices</h2>
+                <input type="text" id="mapper-device-filter" placeholder="Filter devices..." class="filter-input">
+                <table id="mapper-device-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-col="ip">IP Address</th>
+                            <th class="sortable" data-col="mac">MAC</th>
+                            <th class="sortable" data-col="vendor">Vendor</th>
+                            <th class="sortable" data-col="hostname">Hostname</th>
+                            <th class="sortable" data-col="device_type">Device Type</th>
+                            <th class="sortable" data-col="os_guess">OS Guess</th>
+                            <th class="sortable" data-col="open_ports">Open Ports</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mapper-device-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div id="notifications" class="notifications"></div>
+
+    <script src="ping.js"></script>
+    <script src="trace.js"></script>
+    <script src="mapper.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

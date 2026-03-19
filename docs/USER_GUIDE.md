@@ -1288,6 +1288,92 @@ All three tabs provide export buttons. Clicking an export button downloads the d
 | Mapper | SVG | Network topology diagram as vector graphic |
 | Mapper | Visio | Network topology as .vsdx file (opens in Microsoft Visio or compatible editors) |
 
+### API Reference
+
+The web dashboard exposes a REST + SSE API under `/api/`. All endpoints return JSON unless noted otherwise.
+
+#### Global
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/status` | Which tools are currently active (ping, trace, mapper) |
+
+#### Ping (`/api/ping/`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/ping/targets` | All monitored targets with current stats |
+| GET | `/api/ping/targets/{id}` | Single target detail |
+| GET | `/api/ping/targets/{id}/history` | Recent in-memory ping results |
+| GET | `/api/ping/targets/{id}/db-history` | Historical ping data from SQLite |
+| GET | `/api/ping/events` | SSE stream: `ping_result`, `stats_update`, `alert_fired` |
+| POST | `/api/ping/start` | Start a ping/monitor job (JSON body with all CLI flags) |
+| POST | `/api/ping/stop` | Stop the running ping job |
+| GET | `/api/ping/status` | Current ping job status |
+| GET | `/api/ping/results` | Accumulated ping results for the current job |
+| GET | `/api/ping/export` | Export ping data (query params: `format`, `host`) |
+| GET | `/api/ping/export/hosts` | List hosts available for export |
+
+#### Trace (`/api/trace/`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/trace/hops` | Current hop data with per-hop statistics |
+| GET | `/api/trace/info` | Target, round count, max TTL, all hops |
+| GET | `/api/trace/events` | SSE stream: `hop_update`, `round_complete`, `path_change` |
+| POST | `/api/trace/start` | Start a traceroute/MTR job (JSON body with all CLI flags) |
+| POST | `/api/trace/stop` | Stop the running trace job |
+| GET | `/api/trace/status` | Current trace job status |
+| GET | `/api/trace/export` | Export trace data (query params: `format`) |
+
+#### Mapper (`/api/mapper/`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/mapper/devices` | All discovered devices from the current/last scan |
+| GET | `/api/mapper/topology` | Topology graph (nodes + edges for D3.js) |
+| GET | `/api/mapper/scan-info` | Scan metadata (ID, timestamps, subnets, device count) |
+| GET | `/api/mapper/diff` | Diff between current and previous scan |
+| GET | `/api/mapper/traps` | Recent SNMP trap events |
+| GET | `/api/mapper/events` | SSE stream: scan progress, phase changes, completion |
+| GET | `/api/mapper/trap-events` | SSE stream: live SNMP trap events |
+| POST | `/api/mapper/start` | Start a network scan (JSON body with all CLI flags) |
+| POST | `/api/mapper/stop` | Stop the running scan |
+| GET | `/api/mapper/status` | Current scan job status |
+| GET | `/api/mapper/export` | Export scan data (query params: `format`, `scan_id`) |
+
+#### POST Body Examples
+
+Start a ping job:
+```json
+{
+  "target": "8.8.8.8",
+  "method": "icmp",
+  "count": 100,
+  "interval": "1s",
+  "timeout": "2s"
+}
+```
+
+Start a traceroute:
+```json
+{
+  "target": "google.com",
+  "method": "tcp",
+  "port": 443,
+  "max_ttl": 30
+}
+```
+
+Start a network scan:
+```json
+{
+  "subnets": ["192.168.1.0/24"],
+  "ports": [22, 80, 443],
+  "snmp_community": "public"
+}
+```
+
 ---
 
 ## Database Files

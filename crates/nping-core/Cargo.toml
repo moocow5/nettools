@@ -21,5 +21,4 @@ libc = "0.2"
 windows-sys = { version = "0.59", features = [
     "Win32_Foundation",
     "Win32_NetworkManagement_IpHelper",
-    "Win32_Networking_WinSock",
 ] }

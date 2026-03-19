@@ -5,11 +5,10 @@ use std::net::IpAddr;
 use std::sync::Mutex;
 use std::time::Duration;
 
-use windows_sys::Win32::Foundation::{CloseHandle, HANDLE, INVALID_HANDLE_VALUE};
+use windows_sys::Win32::Foundation::{HANDLE, INVALID_HANDLE_VALUE};
 use windows_sys::Win32::NetworkManagement::IpHelper::{
-    IcmpCloseHandle, IcmpCreateFile, IcmpSendEcho, ICMP_ECHO_REPLY,
+    IcmpCloseHandle, IcmpCreateFile, IcmpSendEcho, ICMP_ECHO_REPLY, IP_OPTION_INFORMATION,
 };
-use windows_sys::Win32::Networking::WinSock::IPAddr;
 
 // ---------------------------------------------------------------------------
 // IcmpSocket — Windows implementation
@@ -26,6 +25,8 @@ pub struct IcmpSocket {
     handle: IcmpHandle,
     /// Pending request stashed by `send_ping`, consumed by `recv_ping`.
     pending: Mutex<Option<PendingRequest>>,
+    ttl: Mutex<Option<u8>>,
+    tos: Mutex<Option<u8>>,
 }
 
 struct PendingRequest {
@@ -58,7 +59,21 @@ impl IcmpSocket {
         Ok(Self {
             handle: IcmpHandle(handle),
             pending: Mutex::new(None),
+            ttl: Mutex::new(None),
+            tos: Mutex::new(None),
         })
+    }
+
+    /// Set the IP TTL (Time To Live) for subsequent pings.
+    pub fn set_ttl(&self, ttl: u8) -> Result<()> {
+        *self.ttl.lock().unwrap() = Some(ttl);
+        Ok(())
+    }
+
+    /// Set the IP ToS (Type of Service) / DSCP value for subsequent pings.
+    pub fn set_tos(&self, tos: u8) -> Result<()> {
+        *self.tos.lock().unwrap() = Some(tos);
+        Ok(())
     }
 }
 
@@ -86,12 +101,15 @@ impl PingSocket for IcmpSocket {
             .take()
             .ok_or_else(|| NpingError::Other("recv_ping called without a prior send_ping".into()))?;
 
-        let handle = self.handle.0;
+        // Cast HANDLE to isize so it is Send-safe for the blocking closure.
+        let handle = self.handle.0 as isize;
         let timeout_ms = timeout.as_millis().min(u32::MAX as u128) as u32;
+        let ttl = *self.ttl.lock().unwrap();
+        let tos = *self.tos.lock().unwrap();
 
         // IcmpSendEcho is blocking, so offload to the tokio blocking pool.
         tokio::task::spawn_blocking(move || {
-            icmp_send_echo(handle, &pending.packet, pending.target, timeout_ms)
+            icmp_send_echo(handle as HANDLE, &pending.packet, pending.target, timeout_ms, ttl, tos)
         })
         .await
         .map_err(|e| NpingError::Other(format!("blocking task panicked: {e}")))?
@@ -104,6 +122,8 @@ fn icmp_send_echo(
     packet: &[u8],
     target: IpAddr,
     timeout_ms: u32,
+    ttl: Option<u8>,
+    tos: Option<u8>,
 ) -> Result<Option<RecvResult>> {
     let dest_addr: u32 = match target {
         IpAddr::V4(v4) => u32::from_ne_bytes(v4.octets()),
@@ -129,13 +149,27 @@ fn icmp_send_echo(
         std::mem::size_of::<ICMP_ECHO_REPLY>() + request_data.len().max(8) + 8;
     let mut reply_buf = vec![0u8; reply_buf_size];
 
+    // Build IP_OPTION_INFORMATION if TTL or TOS was requested.
+    let mut ip_opts = IP_OPTION_INFORMATION {
+        Ttl: ttl.unwrap_or(128),
+        Tos: tos.unwrap_or(0),
+        Flags: 0,
+        OptionsSize: 0,
+        OptionsData: std::ptr::null_mut(),
+    };
+    let opts_ptr = if ttl.is_some() || tos.is_some() {
+        &mut ip_opts as *mut IP_OPTION_INFORMATION
+    } else {
+        std::ptr::null_mut()
+    };
+
     let ret = unsafe {
         IcmpSendEcho(
             handle,
-            dest_addr as IPAddr,
+            dest_addr,
             request_data.as_ptr() as *mut _,
             request_data.len() as u16,
-            std::ptr::null_mut(), // no IP options
+            opts_ptr as *mut _,
             reply_buf.as_mut_ptr() as *mut _,
             reply_buf_size as u32,
             timeout_ms,
